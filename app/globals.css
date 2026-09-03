@@ -1,0 +1,296 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   DESIGN SYSTEM -- "cold black board, cyan traces, one hot solder accent"
+   The accent is scarce on purpose: it only ever means CURRENT / ACTIVE.
+   ========================================================================== */
+
+@theme {
+  /* Substrate */
+  --color-board: #04070a;
+  --color-board-2: #070b11;
+  --color-board-3: #0b1119;
+  --color-mask: #0a1016; /* soldermask fill inside component outlines */
+
+  /* Copper */
+  --color-copper: #123b46; /* unlit trace */
+  --color-copper-2: #0d2a33; /* deepest trace / ground pour */
+  --color-trace: #2ec9c0; /* lit trace */
+  --color-trace-hi: #6ff2e6; /* lit trace, highlight */
+
+  /* Current -- the one hot accent. Solder amber. */
+  --color-hot: #ff9d3d;
+  --color-hot-hi: #ffc785;
+
+  /* Silkscreen + type */
+  --color-silk: #8ba3b0; /* printed silkscreen text */
+  --color-silk-dim: #7d8f9b; /* 6.0:1 on --color-board */
+  --color-ink: #dbe7ee; /* body text */
+  --color-ink-dim: #9fb2be;
+
+  /* Halves */
+  --color-physical: #d3bda0; /* perfboard / phenolic tan */
+  --color-digital: #2ec9c0;
+
+  --font-mono:
+    var(--font-jetbrains), ui-monospace, "SF Mono", "Cascadia Mono", Menlo,
+    Consolas, monospace;
+  --font-display:
+    var(--font-grotesk), ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+  /* Board voltage: driven live by GitHub contribution volume (lib/github.ts).
+     0 = dark board, 1 = fully powered. Everything glowy reads from this. */
+  --voltage: 0.62;
+  /* Current flow speed multiplier, also nudged by activity. */
+  --flow: 1;
+}
+
+html {
+  background: var(--color-board);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-board);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1, "zero" 1;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-hot) 55%, transparent);
+  color: #05070a;
+}
+
+/* Focus: a solder pad ring, never a browser default */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-hot);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+/* Skip link */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  padding: 0.6rem 1rem;
+  background: var(--color-hot);
+  color: #05070a;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: translateY(-120%);
+  transition: transform 0.14s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   TYPE HELPERS
+   ========================================================================== */
+
+.silk {
+  font-size: 0.625rem;
+  line-height: 1.1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-silk-dim);
+}
+
+.desig {
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  color: var(--color-hot);
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   BOARD TEXTURES
+   Physical half = perfboard drill grid. Digital half = etched copper hatch.
+   Both are pure CSS so they cost nothing to paint.
+   ========================================================================== */
+
+.tex-perfboard {
+  background-color: var(--color-board-2);
+  background-image:
+    radial-gradient(
+      circle at center,
+      color-mix(in oklab, var(--color-physical) 26%, transparent) 0 1.1px,
+      transparent 1.4px
+    ),
+    radial-gradient(
+      circle at center,
+      color-mix(in oklab, #000 70%, transparent) 0 2.6px,
+      transparent 3px
+    );
+  background-size:
+    32px 32px,
+    32px 32px;
+  background-position:
+    0 0,
+    0 0;
+}
+
+.tex-etched {
+  background-color: var(--color-board-2);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--color-copper) 40%, transparent) 0 1px,
+      transparent 1px 64px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in oklab, var(--color-copper) 28%, transparent) 0 1px,
+      transparent 1px 64px
+    );
+}
+
+/* Fine grain over the whole board -- fibreglass weave, not noise-for-noise's-sake */
+.tex-grain {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.014) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0, 0, 0, 0.05) 0 1px,
+      transparent 1px 3px
+    );
+}
+
+/* ==========================================================================
+   CURRENT FLOW
+   One keyframe drives every animated trace. Speed varies by dash length.
+   ========================================================================== */
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.flowing {
+  animation: flow calc(6s / var(--flow)) linear infinite;
+}
+
+/* ==========================================================================
+   LEVEL OF DETAIL
+   --cam-scale is written to the world container by the camera loop. Fine
+   silkscreen only resolves once you are actually close enough to read it,
+   which is both how a real board behaves and a free performance win when the
+   camera is pulled all the way back.
+   ========================================================================== */
+
+.lod-fine {
+  opacity: clamp(0, calc((var(--cam-scale, 1) - 0.45) * 6), 1);
+}
+.lod-mid {
+  opacity: clamp(0, calc((var(--cam-scale, 1) - 0.18) * 8), 1);
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   The current does not stop -- it slows to a breath. Everything else calms.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .flowing {
+    animation: pulse-soft 5s ease-in-out infinite !important;
+  }
+  .reduce-keep {
+    animation-duration: 5s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* ==========================================================================
+   DOCUMENT VIEW -- the plain, linear reading of the same content.
+   Also what you get with JavaScript off.
+   ========================================================================== */
+
+.doc {
+  --measure: 68ch;
+}
+.doc h2 {
+  font-size: 0.6875rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-hot);
+}
+.doc h3 {
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+.doc p {
+  color: var(--color-ink-dim);
+  max-width: var(--measure);
+  line-height: 1.65;
+}

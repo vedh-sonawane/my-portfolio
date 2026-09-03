@@ -28,7 +28,20 @@ npm run dev                    # http://localhost:3000
 npm run build && npm start     # production
 ```
 
-Deploys to Vercel with zero configuration and zero paid services.
+Deploys to Vercel with zero configuration and zero paid services. Import the
+repo, leave every build setting on its default, and deploy.
+
+### Environment variables
+
+| Key | Required | What happens if you leave it out |
+| --- | --- | --- |
+| `GITHUB_TOKEN` | no, but wanted | The output node says "calendar offline" and the totals fall back to `identity.fallbackStats`. Everything else renders. |
+| `GITHUB_LOGIN` | no | Falls back to `identity.githubLogin` in `data/content.ts`. Only set it to point the board at a different account. |
+| `NEXT_PUBLIC_SITE_URL` | no | Falls back to Vercel's `VERCEL_PROJECT_PRODUCTION_URL`, so a fresh deploy is already self-consistent. Set it once a custom domain is attached. |
+
+On Vercel these go in Settings, Environment Variables. Environment variables are
+read at build time, so a deployment that already exists will not pick up a new
+value until you redeploy.
 
 ---
 

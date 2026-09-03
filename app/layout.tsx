@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { identity } from "@/data/content";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const jetbrains = JetBrains_Mono({
@@ -14,8 +15,6 @@ const grotesk = Space_Grotesk({
   variable: "--font-grotesk",
   display: "swap",
 });
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vedh-s.vercel.app";
 
 const description =
   "Vedh Sonawane builds full-stack software, AI agents and things you can pick up: autonomous rovers, embedded companions, Slack agents and a self-rewriting ARG. A portfolio laid out as a live circuit board.";

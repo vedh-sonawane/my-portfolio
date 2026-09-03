@@ -37,7 +37,7 @@ export default function ContactTerminal({
       reached={reached}
       active={active}
       onActivate={onActivate}
-      label="TB1 — output terminal. Contact links."
+      label="TB1: output terminal. Contact links."
     >
       <svg
         className="absolute inset-0 h-full w-full"

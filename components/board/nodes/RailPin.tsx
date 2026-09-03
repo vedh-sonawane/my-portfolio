@@ -35,7 +35,7 @@ export default function RailPin({
       active={active}
       onActivate={onActivate}
       readoutWidth={380}
-      label={`${hackathon.designator} — ${hackathon.name}, ${hackathon.location}, ${hackathon.date}`}
+      label={`${hackathon.designator}: ${hackathon.name}, ${hackathon.location}, ${hackathon.date}`}
       readout={
         built.length > 0 ? (
           <Readout title={`${hackathon.designator} // cross-wired`}>

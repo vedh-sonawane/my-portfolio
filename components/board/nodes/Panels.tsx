@@ -66,7 +66,7 @@ export function LegendPanel({
       reached={reached}
       active={active}
       onActivate={onActivate}
-      label="Silkscreen legend — parts index of languages, frameworks, AI tooling and hardware."
+      label="Silkscreen legend: parts index of languages, frameworks, AI tooling and hardware."
     >
       <Frame title="Parts index · Skills" hot={active === node.id}>
         <div
@@ -117,7 +117,7 @@ export function FirmwarePanel({
       reached={reached}
       active={active}
       onActivate={onActivate}
-      label={`Firmware ${firmware.version} — currently exploring and reading.`}
+      label={`Firmware ${firmware.version}: currently exploring and reading.`}
     >
       <Frame title={`Firmware ${firmware.version}`} hot={active === node.id}>
         <div
@@ -133,7 +133,7 @@ export function FirmwarePanel({
             {firmware.reading.map((b) => (
               <li key={b.title} className="list-none text-[14px] text-ink-dim">
                 <span className="text-ink">{b.title}</span>
-                <span className="text-silk-dim"> — </span>
+                <span className="text-silk-dim"> by </span>
                 {b.author}
               </li>
             ))}
@@ -170,7 +170,7 @@ export function StampsPanel({
       reached={reached}
       active={active}
       onActivate={onActivate}
-      label="Stamps — certification, award and spoken languages."
+      label="Stamps: certification, award and spoken languages."
     >
       <Frame title="Stamps" hot={active === node.id}>
         <div
@@ -253,7 +253,7 @@ export function Beacon({
           <p className="m-0 text-[13px] leading-relaxed text-ink-dim">{item.detail}</p>
         </Readout>
       }
-      label={`${item.designator} — ${item.name}. ${item.detail}`}
+      label={`${item.designator}: ${item.name}. ${item.detail}`}
     >
       <svg
         className="absolute inset-0 h-full w-full"

@@ -39,7 +39,7 @@ export default function Amplifier({
           <ul className="m-0 space-y-2 p-0">
             {experience.points.map((p) => (
               <li key={p} className="list-none text-[13px] leading-relaxed text-ink-dim">
-                <span className="mr-2 text-hot">—</span>
+                <span className="mr-2 text-hot">·</span>
                 {p}
               </li>
             ))}
@@ -49,7 +49,7 @@ export default function Amplifier({
           </p>
         </Readout>
       }
-      label={`${experience.designator} — ${experience.role} at ${experience.org}. ${experience.summary}`}
+      label={`${experience.designator}: ${experience.role} at ${experience.org}. ${experience.summary}`}
     >
       <svg
         className="absolute inset-0 h-full w-full"

@@ -135,7 +135,7 @@ export default function OutputNode({
     ["Contributions", github.totalContributions.toLocaleString("en-CA")],
     ["Repositories", String(github.repositories)],
     ["Followers", String(github.followers)],
-    ["Streak", github.live ? `${github.currentStreak}d` : "—"],
+    ["Streak", github.live ? `${github.currentStreak}d` : "n/a"],
   ];
 
   return (
@@ -144,7 +144,7 @@ export default function OutputNode({
       reached={reached}
       active={active}
       onActivate={onActivate}
-      label={`OUT1 — live GitHub output. ${github.totalContributions.toLocaleString(
+      label={`OUT1: live GitHub output. ${github.totalContributions.toLocaleString(
         "en-CA",
       )} contributions in the past year across ${github.repositories} public repositories.`}
     >
@@ -205,7 +205,7 @@ export default function OutputNode({
               <span className="silk">
                 {github.busiestDay
                   ? `Peak ${github.busiestDay.count} on ${github.busiestDay.date}`
-                  : "Peak —"}
+                  : "Peak n/a"}
               </span>
               <span className="silk">Now</span>
             </div>
@@ -259,7 +259,7 @@ export default function OutputNode({
               <p className="m-0 text-[12px] leading-relaxed text-ink-dim">
                 Contributions, repositories, languages and the commit pulse are
                 pulled live from GitHub and cached for an hour. Hackathons and
-                Devpost entries are hand-maintained — Devpost has no public API.
+                Devpost entries are hand-maintained, because Devpost has no public API.
               </p>
             </div>
           )}

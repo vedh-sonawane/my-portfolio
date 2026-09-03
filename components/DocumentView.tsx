@@ -114,7 +114,7 @@ export default function DocumentView({
           <div>
             <dt className="silk">Education</dt>
             <dd className="mt-1 text-ink-dim">
-              {identity.education.school} — {identity.education.detail}
+              {identity.education.school} · {identity.education.detail}
             </dd>
           </div>
           <div>
@@ -144,7 +144,7 @@ export default function DocumentView({
       </header>
 
       <div className="space-y-12">
-        <Section index="01" title="Physical half — hardware">
+        <Section index="01" title="Physical half · hardware">
           <div className="space-y-7">
             {physical.map((p) => (
               <Entry
@@ -160,7 +160,7 @@ export default function DocumentView({
           </div>
         </Section>
 
-        <Section index="02" title="Digital half — software">
+        <Section index="02" title="Digital half · software">
           <div className="space-y-7">
             {digital.map((p) => (
               <Entry
@@ -176,7 +176,7 @@ export default function DocumentView({
           </div>
         </Section>
 
-        <Section index="03" title="Hackathons — power rail">
+        <Section index="03" title="Hackathons · power rail">
           <ol className="space-y-4">
             {hackathons.map((h) => {
               const built = projects.filter((p) => p.origin === h.id);
@@ -201,17 +201,17 @@ export default function DocumentView({
           </ol>
         </Section>
 
-        <Section index="04" title="Experience — signal amplifier">
+        <Section index="04" title="Experience · signal amplifier">
           <Entry
             designator={experience.designator}
-            name={`${experience.role} — ${experience.org}`}
+            name={`${experience.role}, ${experience.org}`}
             meta={experience.stack.join(" · ")}
           >
             <p className="mt-2">{experience.summary}</p>
             <ul className="mt-3 space-y-1.5 text-ink-dim">
               {experience.points.map((pt) => (
                 <li key={pt} className="max-w-[68ch]">
-                  <span className="mr-2 text-silk-dim">—</span>
+                  <span className="mr-2 text-silk-dim">·</span>
                   {pt}
                 </li>
               ))}
@@ -229,7 +229,7 @@ export default function DocumentView({
           </div>
         </Section>
 
-        <Section index="06" title="Output — live GitHub telemetry">
+        <Section index="06" title="Output · live GitHub telemetry">
           <dl className="grid grid-cols-2 gap-6 sm:grid-cols-4">
             {[
               ["Contributions", github.totalContributions.toLocaleString("en-CA")],
@@ -249,12 +249,12 @@ export default function DocumentView({
           </p>
         </Section>
 
-        <Section index="07" title="Legend — skills index">
+        <Section index="07" title="Legend · skills index">
           <div className="grid gap-7 sm:grid-cols-2">
             {legend.map((group) => (
               <div key={group.key}>
                 <h3 className="silk">
-                  {group.key} — {group.label}
+                  {group.key} · {group.label}
                 </h3>
                 <p className="mt-2">{group.items.join(", ")}</p>
               </div>
@@ -262,7 +262,7 @@ export default function DocumentView({
           </div>
         </Section>
 
-        <Section index="08" title={`Firmware ${firmware.version} — currently`}>
+        <Section index="08" title={`Firmware ${firmware.version} · currently`}>
           <div className="grid gap-7 sm:grid-cols-2">
             <div>
               <h3 className="silk">Exploring</h3>
@@ -273,7 +273,7 @@ export default function DocumentView({
               <ul className="mt-2 space-y-1 text-ink-dim">
                 {firmware.reading.map((b) => (
                   <li key={b.title}>
-                    <span className="text-ink">{b.title}</span> — {b.author}
+                    <span className="text-ink">{b.title}</span> by {b.author}
                   </li>
                 ))}
               </ul>
@@ -281,11 +281,11 @@ export default function DocumentView({
           </div>
         </Section>
 
-        <Section index="09" title="Stamps — awards, certification, languages">
+        <Section index="09" title="Stamps · awards, certification, languages">
           <ul className="space-y-2 text-ink-dim">
             <li>
               <span className="desig mr-2">{credentials.certification.stamp}</span>
-              {credentials.certification.name} — {credentials.certification.issuer}
+              {credentials.certification.name} · {credentials.certification.issuer}
             </li>
             {credentials.awards.map((a) => (
               <li key={a.name}>
@@ -296,7 +296,7 @@ export default function DocumentView({
           </ul>
         </Section>
 
-        <Section index="10" title="Terminal — open a connection">
+        <Section index="10" title="Terminal · open a connection">
           <ul className="space-y-2">
             <li>
               <a

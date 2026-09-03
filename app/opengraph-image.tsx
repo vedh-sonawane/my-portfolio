@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { identity } from "@/data/content";
 
-export const alt = `${identity.name} — ${identity.tagline}`;
+export const alt = `${identity.name}: ${identity.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -125,7 +125,7 @@ export default async function Image() {
             {identity.tagline}
           </div>
           <div style={{ fontSize: 19, color: "#8ba3b0", marginTop: 22 }}>
-            Full-stack · AI · hardware — Oakville / Toronto
+            Full-stack · AI · hardware · Oakville / Toronto
           </div>
         </div>
 

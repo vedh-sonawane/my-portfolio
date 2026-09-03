@@ -1,4 +1,4 @@
-# CURRENT — Vedh Sonawane's portfolio
+# CURRENT: Vedh Sonawane's portfolio
 
 > software that doesn't always stay on a screen.
 
@@ -34,7 +34,7 @@ Deploys to Vercel with zero configuration and zero paid services.
 
 ## Where to edit things
 
-### Content — `data/content.ts`
+### Content: `data/content.ts`
 
 This is the single hand-maintained source of truth. Everything you would
 normally want to change lives here:
@@ -53,7 +53,7 @@ normally want to change lives here:
 
 **Adding a project** takes two steps:
 
-1. add it to `projects` in `data/content.ts` — set `half` to `"physical"` or
+1. add it to `projects` in `data/content.ts`: set `half` to `"physical"` or
    `"digital"`, pick a `footprint`, and give it a `designator` (`U17`, `M2`, …);
 2. give it a position in `PROJECT_SLOTS` in `lib/layout.ts`.
 
@@ -61,33 +61,33 @@ Everything else follows automatically: the stub trace to the row bus, the
 minimap, the document view, the keyboard order and the board inventory count.
 
 Setting `origin: "<hackathon id>"` on a project draws a **cross-wire** from that
-hackathon's connector pin up to the chip — "this event produced this build".
+hackathon's connector pin up to the chip: "this event produced this build".
 
-### Layout and camera — `lib/layout.ts`
+### Layout and camera: `lib/layout.ts`
 
 The board lives in a `4700 × 3560` world. World units are CSS pixels at scale 1.
 
-- `BUSES` — the copper. `main` is the primary artery and is drawn with a
+- `BUSES`: the copper. `main` is the primary artery and is drawn with a
   gradient that changes material as it crosses the seam.
-- `PROJECT_SLOTS` — where each project sits, and which row bus it stubs to.
-- `STOPS` — the camera rail.
+- `PROJECT_SLOTS`: where each project sits, and which row bus it stubs to.
+- `STOPS`: the camera rail.
 
 **Camera stops are framed rectangles, not zoom levels.** Each stop names a world
 rectangle; the scale is derived from the viewport at runtime. That is why the
 same rail works on a 380px phone and a 27" display without a second set of
 numbers. A stop can declare:
 
-- `mobileRect` — a different framing at ≤768px;
-- `mobileSplit` — an array of rectangles that becomes *several* tighter stops on
+- `mobileRect`: a different framing at ≤768px;
+- `mobileSplit`: an array of rectangles that becomes *several* tighter stops on
   a phone, so a portrait screen frames one column of the board at a time;
-- `desktopOnly` — skipped on small screens to keep the mobile rail shorter;
-- `maxScale` — a ceiling on zoom.
+- `desktopOnly`: skipped on small screens to keep the mobile rail shorter;
+- `maxScale`: a ceiling on zoom.
 
 To add a stop, add an entry to `STOPS` and point the relevant nodes at it with
 `stop: stopIndex("your-id")`. The scroll driver, the HUD progress readout, the
 keyboard navigation and the power-on sequencing all read from that one list.
 
-### Motion and colour — `app/globals.css`
+### Motion and colour: `app/globals.css`
 
 One accent (`--color-hot`, solder amber) means *current* and nothing else.
 `--voltage` and `--flow` are written onto the page from live GitHub activity, so
@@ -99,7 +99,7 @@ fine silkscreen only resolves once you are close enough to read it.
 
 ## Live data
 
-### GitHub — the one genuinely live source
+### GitHub: the one genuinely live source
 
 `lib/github.ts` fetches, in a single GraphQL query, cached for one hour:
 
@@ -127,7 +127,7 @@ template.
 says so plainly instead of inventing data, and the totals fall back to
 `identity.fallbackStats` in `data/content.ts`.
 
-### Devpost — no public API
+### Devpost: no public API
 
 Devpost does not have an official public API. There is deliberately **no code
 here that calls one.** Hackathons and Devpost project entries are maintained by
@@ -138,7 +138,7 @@ hand-maintained file the reliable option rather than the compromise.
 
 `lib/daily.ts` picks the TRANSMISSION line shown on the output node:
 
-1. a real commit from the last 36 hours, if there is one — SIGNAL//LOST wins the
+1. a real commit from the last 36 hours, if there is one. SIGNAL//LOST wins the
    tie because it rewrites itself daily by design;
 2. otherwise a deterministic pick from `transmissions`, keyed by the UTC date,
    so every visitor on a given day sees the same line and it rotates at midnight
@@ -158,20 +158,21 @@ derives a different value and hydration stays clean.
 | **Free roam** | the page cannot scroll; the wheel is zoom | "Explore the board", or press `E` |
 
 The two modes never both interpret scroll. In free roam the page scroll is
-locked and the whole board is energised — you cannot explore a dark section.
+locked and the whole board is energised, so you never end up exploring a dark
+section.
 
 **Keyboard**
 
 | Key | Guided | Free roam |
 | --- | --- | --- |
-| `↑` `↓` `PgUp` `PgDn` `Space` | previous / next stop | — |
-| `Home` `End` | first / last stop | — |
+| `↑` `↓` `PgUp` `PgDn` `Space` | previous / next stop | n/a |
+| `Home` `End` | first / last stop | n/a |
 | `Tab` | move to the next component; the camera flies to it | move focus |
-| `W A S D`, arrows | — | pan |
-| `Shift` | — | pan faster |
-| `+` `-`, wheel, pinch | — | zoom |
+| `W A S D`, arrows | n/a | pan |
+| `Shift` | n/a | pan faster |
+| `+` `-`, wheel, pinch | n/a | zoom |
 | `E` | enter free roam | return to the tour |
-| `Esc` | — | return to the tour |
+| `Esc` | n/a | return to the tour |
 
 ---
 
@@ -181,12 +182,12 @@ locked and the whole board is energised — you cannot explore a dark section.
   into a canvas. The node order in `components/board/World.tsx` is the narrative
   order, so tabbing through or reading with a screen reader tells the story in
   the same sequence the camera does.
-- **`/document`** is the same content read straight down — the no-JavaScript
+- **`/document`** is the same content read straight down: the no-JavaScript
   rendering, the "read as document" escape hatch, and the linear record for
   search engines. It is in the sitemap.
 - **`prefers-reduced-motion`**: the camera stops scrubbing and moves between
   stops discretely, reveals become plain fades, and the current slows from a
-  travelling dash to a gentle breath. It never stops entirely — the board should
+  travelling dash to a gentle breath. It never stops entirely, because the board should
   still read as alive.
 - **The camera never goes through React.** It is written straight to the DOM
   inside one `requestAnimationFrame` loop, so panning stays smooth no matter how

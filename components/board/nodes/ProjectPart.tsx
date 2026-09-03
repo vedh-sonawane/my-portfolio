@@ -33,7 +33,7 @@ export default function ProjectPart({
       reached={reached}
       active={active}
       onActivate={onActivate}
-      label={`${project.designator} — ${project.name}. ${project.blurb}`}
+      label={`${project.designator}: ${project.name}. ${project.blurb}`}
       readoutWidth={440}
       readout={
         <Readout title={`${project.designator} // datasheet`}>

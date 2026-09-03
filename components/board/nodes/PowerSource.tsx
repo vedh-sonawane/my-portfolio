@@ -40,7 +40,7 @@ export function Ignition({
       active={active}
       onActivate={onActivate}
       dimOpacity={0.9}
-      label="SW1 — power switch. The board is energised here."
+      label="SW1: power switch. The board is energised here."
     >
       <svg
         className="absolute inset-0 h-full w-full"
@@ -121,7 +121,7 @@ export function PowerSource({
       reached={reached}
       active={active}
       onActivate={onActivate}
-      label={`${identity.name} — ${identity.tagline}`}
+      label={`${identity.name}: ${identity.tagline}`}
     >
       <svg
         className="absolute inset-0 h-full w-full"

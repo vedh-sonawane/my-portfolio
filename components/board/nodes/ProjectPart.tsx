@@ -1,7 +1,7 @@
 "use client";
 
 import type { Project } from "@/data/content";
-import { hackathons } from "@/data/content";
+import { hackathons, repoUrl } from "@/data/content";
 import type { BoardNode } from "@/lib/layout";
 import Footprint, { INSET } from "@/components/board/Footprint";
 import Node, { Readout } from "@/components/board/Node";
@@ -26,6 +26,12 @@ export default function ProjectPart({
   const origin = project.origin
     ? hackathons.find((h) => h.id === project.origin)
     : undefined;
+  const repos = (project.repos ?? []).map((slug) => ({ slug, url: repoUrl(slug) }));
+  // A live build is the more interesting destination when there is one.
+  const primary = project.live ?? repos[0]?.url;
+  const primaryLabel = project.live
+    ? `Open ${project.name}, live build, in a new tab`
+    : `Open the ${project.name} repository on GitHub in a new tab`;
 
   return (
     <Node
@@ -34,6 +40,10 @@ export default function ProjectPart({
       active={active}
       onActivate={onActivate}
       label={`${project.designator}: ${project.name}. ${project.blurb}`}
+      href={primary}
+      hrefLabel={primaryLabel}
+      silk={project.designator}
+      silkSize={big ? 15 : 13}
       readoutWidth={440}
       readout={
         <Readout title={`${project.designator} // datasheet`}>
@@ -53,16 +63,33 @@ export default function ProjectPart({
               Cross-wired from {origin.designator} · {origin.name}
             </p>
           ) : null}
-          {project.url ? (
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="mt-3 inline-block text-[12px] tracking-[0.14em] text-hot uppercase underline decoration-hot/40 underline-offset-4"
-            >
-              Open live build →
-            </a>
-          ) : null}
+          <ul className="m-0 mt-3 flex flex-col gap-1.5 p-0">
+            {project.live ? (
+              <li className="list-none">
+                <a
+                  href={project.live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="silk inline-block underline decoration-hot/40 underline-offset-4 hover:decoration-hot"
+                  style={{ color: "var(--color-hot)" }}
+                >
+                  Open live build
+                </a>
+              </li>
+            ) : null}
+            {repos.map((r) => (
+              <li key={r.slug} className="list-none">
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="silk inline-block underline decoration-silk-dim/40 underline-offset-4 hover:decoration-hot"
+                >
+                  github.com/{r.slug}
+                </a>
+              </li>
+            ))}
+          </ul>
         </Readout>
       }
     >
@@ -74,17 +101,16 @@ export default function ProjectPart({
         hot={hot}
       />
 
-      {/* glow under the body once the part is drawing current */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: hot
-            ? "radial-gradient(60% 60% at 50% 50%, color-mix(in oklab, var(--color-hot) 26%, transparent), transparent 70%)"
-            : `radial-gradient(60% 60% at 50% 50%, color-mix(in oklab, var(--color-trace) calc(var(--voltage) * 16%), transparent), transparent 70%)`,
-          opacity: powered ? 1 : 0,
-          transition: "opacity 700ms ease 380ms, background 260ms ease",
-        }}
-      />
+      {/* Sheen under the body, painted only while the part is active. */}
+      {hot ? (
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(62% 62% at 50% 50%, color-mix(in oklab, var(--color-hot) 20%, transparent), transparent 72%)",
+          }}
+        />
+      ) : null}
 
       <div
         className="relative flex h-full flex-col justify-center"
@@ -97,16 +123,7 @@ export default function ProjectPart({
           transition: "opacity 600ms ease 480ms",
         }}
       >
-        <p
-          className="desig m-0 leading-none"
-          style={{ fontSize: big ? 15 : 13, color: hot ? "var(--color-hot-hi)" : undefined }}
-        >
-          {project.designator}
-        </p>
-        <h3
-          className="m-0 leading-tight text-ink"
-          style={{ fontSize: big ? 30 : 24, marginTop: 8 }}
-        >
+        <h3 className="m-0 leading-tight text-ink" style={{ fontSize: big ? 30 : 24 }}>
           {project.name}
         </h3>
         {big ? (

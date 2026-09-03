@@ -102,11 +102,46 @@ keyboard navigation and the power-on sequencing all read from that one list.
 
 ### Motion and colour: `app/globals.css`
 
-One accent (`--color-hot`, solder amber) means *current* and nothing else.
-`--voltage` and `--flow` are written onto the page from live GitHub activity, so
-a busier year genuinely makes the board brighter and the current faster.
+The target is a real board photographed under warm soft light, not an arcade
+cabinet. The substrate is matte solder mask, unlit metal is bronze copper, and
+energised copper shifts to a muted teal. One accent, `--color-hot` solder
+amber, means *current* and appears nowhere else; that scarcity is the only
+reason the current reads as alive.
+
+`--voltage` and `--flow` are written onto the page from live GitHub activity,
+so a busier year genuinely makes the board brighter and the current faster.
 `--cam-scale` is written by the camera loop and drives the `.lod-*` classes, so
 fine silkscreen only resolves once you are close enough to read it.
+
+### Type
+
+Three faces, three jobs:
+
+| Face | Used for |
+| --- | --- |
+| **Martian Mono** | the silkscreen. Wide and mechanical, drawn for labelling rather than for code. Short uppercase strings only, at 75% width. |
+| **Spline Sans Mono** | telemetry and body. Narrow enough to stay legible at 11px inside a component body. |
+| **Instrument Serif** | the name and the tagline at the crossover, and nothing else. |
+
+All three are self-hosted through `next/font`.
+
+### Fabrication rules
+
+The copper layer enforces the rules a real board obeys, because their absence
+is what makes a drawing read as decorative:
+
+- traces run horizontal, vertical or 45 degrees, never at arbitrary angles, and
+  corners are chamfered (`orthPath`, `routed45`). The single exception is the
+  jumper arcing over the seam, which is a wire, not copper;
+- width follows role: power bus thick, distribution medium, signal thin;
+- every trace flares into a **teardrop** where it meets a pad (`teardropPath`);
+- **vias** punctuate the long runs;
+- pads are bare copper, so they sit lighter than the mask-covered trace;
+- **fiducials** and mounting holes sit at the board corners;
+- reference designators are printed on the silkscreen *beside* each footprint,
+  not inside it;
+- nothing is empty: the unrouted area of each half is flooded with a hatched
+  copper **ground pour**, tinted to that half and tiled from a 32px SVG.
 
 ---
 
@@ -114,7 +149,7 @@ fine silkscreen only resolves once you are close enough to read it.
 
 ### GitHub: the one genuinely live source
 
-`lib/github.ts` fetches, in a single GraphQL query, cached for one hour:
+`lib/github.ts` fetches, in a single GraphQL query, cached for five minutes:
 
 - the contribution calendar and total contributions → **board voltage** and the
   LED matrix on the output node (re-drawn in the board's own language, not as
@@ -123,6 +158,15 @@ fine silkscreen only resolves once you are close enough to read it.
 - top languages by bytes → the language spectrum;
 - recent commits on recently-pushed repos → the **pulse** feed, and the daily
   **TRANSMISSION**.
+
+The whole query costs about 2 points of GitHub's 5,000-per-hour GraphQL budget,
+so a five-minute window uses well under 1% of it.
+
+Next serves cached pages with *stale-while-revalidate*: once the window lapses,
+the next request still gets the cached page while a fresh one is built behind
+it, and the request after that gets the new numbers. If a figure looks one
+commit behind, reload once. A `git push` also triggers a Vercel build, which
+regenerates the page immediately.
 
 The contribution calendar is only available through the *authenticated* GraphQL
 API, so a token is required for it:
@@ -146,6 +190,31 @@ Devpost does not have an official public API. There is deliberately **no code
 here that calls one.** Hackathons and Devpost project entries are maintained by
 hand in `data/content.ts`; they change a few times a year, which makes the
 hand-maintained file the reliable option rather than the compromise.
+
+### Links
+
+Every project node and hackathon connector opens in a new tab, by click or by
+keyboard. The repository slugs in `data/content.ts` were taken from the live
+GitHub API rather than guessed, and every live URL was checked, so nothing on
+the board is a 404. Three hackathons have no confirmed public event page and
+are therefore deliberately not links; they are marked with a TODO in the data
+file. An absent link is honest, an invented one is a dead end.
+
+### The email
+
+The address is never written into the HTML. `identity.emailParts` holds it in
+fragments; `lib/email.ts` joins them **in the browser**, in response to a real
+interaction, and builds the `mailto:` at that moment. Until then the terminal
+shows an open circuit and a masked placeholder, so there is nothing for an
+address harvester to scrape.
+
+It is a real `<button>`, so Enter and Space work and it sits in the tab order
+where you would expect. Activating it reveals the address, copies it, and
+announces the result through an `aria-live` region. It is deliberately not done
+with a CSS `::before` trick, which would break copy-paste and give a screen
+reader nothing to read.
+
+To change the address, edit the pieces in `data/content.ts` and keep them split.
 
 ### The daily detail
 
@@ -203,12 +272,46 @@ section.
   travelling dash to a gentle breath. It never stops entirely, because the board should
   still read as alive.
 - **The camera never goes through React.** It is written straight to the DOM
-  inside one `requestAnimationFrame` loop, so panning stays smooth no matter how
-  much of the board is mounted. The intro's name-solder animation is a CSS
-  custom property for the same reason and costs zero re-renders.
-- **Glow is geometry, not filters.** Every "glowing" trace is a wide faint
-  stroke under a narrow bright one; a Gaussian blur over a 4700×3560 region
-  would be the single most expensive thing to composite.
+  inside one `requestAnimationFrame` loop, and the write is skipped entirely
+  when the camera has not moved. Scrolling triggers no React renders at all.
+  The intro's name-solder animation is a CSS custom property for the same
+  reason and costs zero re-renders.
+- **The current lives in its own layers.** This is the most important
+  performance decision on the board. `stroke-dashoffset` is a paint property,
+  not a compositor one, so animating it invalidates the whole SVG root it
+  belongs to. While the current shared a root with the static copper, every
+  frame repainted a 4700×3560 region dense with geometry and the board sat at
+  **12fps doing nothing at all**. Each animated trace now has its own `<svg>`
+  sized to its own bounding box, and the long main bus is cut into chunks at
+  its corners with the dash phase carried across, so a frame repaints one thin
+  strip containing one path.
+- **Offscreen current stops.** The camera loop flips `data-idle` on traces that
+  have left the viewport a few times a second, which pauses their animation and
+  their repaint. Animation also pauses when the tab is hidden.
+- **Geometry is computed once.** Every path string, bounding box and teardrop is
+  built at module scope, so re-renders do no arithmetic and only flip opacities.
+- **No blur filters anywhere.** A Gaussian blur over a 4700×3560 region is the
+  most expensive thing you can ask a compositor to do. The sheen on a lit trace
+  is the trace itself.
+
+Measured on a full sweep of the entire rail (a far harsher motion than any real
+scroll), before and after this work:
+
+| Scenario | Before | After |
+| --- | --- | --- |
+| Idle at a stop | 12fps | 30fps |
+| Human-speed scroll | 30fps | **60fps** |
+| Full-rail sweep, worst case | 20fps | **60fps** |
+
+Idle sits at 30fps rather than 60 because the ambient current genuinely repaints
+while it flows. It is the only thing still animating, nothing the visitor does
+waits on it, and the motion is slow enough that 30fps is imperceptible.
+
+One thing deliberately **not** done: baking the static copper to a raster. It is
+the textbook fix and it would take idle to 60fps, but the board is examined at
+up to 2x zoom in free roam, and a baked layer would be visibly soft at exactly
+the close-up stops the site is built around. Cutting the vector work in half
+bought the same frames without that cost.
 - Body text meets AA contrast on the board black. The amber accent is used for
   glow and emphasis, not for long-form reading.
 
@@ -229,15 +332,18 @@ components/
     Board.tsx             camera, modes, HUD           (the orchestrator)
     World.tsx             everything in board coordinates
     Substrate.tsx         the two halves and the seam
-    Traces.tsx            the copper layer and the crossover
+    Traces.tsx            static copper + the isolated current layers
     Footprint.tsx         DIP / SOIC / QFP / module / driver / fan bodies
     Node.tsx              positioning, power-on, readout panels
     Minimap.tsx           free-roam map
     Pulse.tsx             the live commit heartbeat
     nodes/                one component per circuit role
-data/content.ts           ← hand-edited source of truth
+data/content.ts           <- hand-edited source of truth
+  EmailReveal.tsx         the open circuit that closes on interaction
 lib/
   layout.ts               world coordinates, buses, camera stops
+  email.ts                assembles the address in the browser
+  site.ts                 canonical URL resolution
   camera.ts               rail interpolation and the free-roam camera
   geometry.ts             orthogonal trace routing, easing
   github.ts               live data + graceful fallbacks

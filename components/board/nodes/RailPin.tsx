@@ -35,6 +35,8 @@ export default function RailPin({
       active={active}
       onActivate={onActivate}
       readoutWidth={380}
+      href={hackathon.url}
+      hrefLabel={`Open ${hackathon.name} in a new tab`}
       label={`${hackathon.designator}: ${hackathon.name}, ${hackathon.location}, ${hackathon.date}`}
       readout={
         built.length > 0 ? (

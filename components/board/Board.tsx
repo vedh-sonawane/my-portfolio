@@ -81,6 +81,12 @@ export default function Board({
   const reducedRef = useRef(false);
   const reachedRef = useRef(0);
   const stopRef = useRef(0);
+  /** Animated traces plus their world bounding boxes, cached from the DOM. */
+  const flowRef = useRef<
+    { el: SVGElement; x: number; y: number; w: number; h: number }[] | null
+  >(null);
+  const cullTick = useRef(0);
+  const wroteRef = useRef<CameraState | null>(null);
   const keysRef = useRef(new Set<string>());
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef = useRef<{ dist: number; scale: number } | null>(null);
@@ -107,6 +113,12 @@ export default function Board({
       mqMotion.removeEventListener("change", sync);
     };
   }, []);
+
+  /* React may rebuild the copper layer when a section powers on, so the
+     cached element list is dropped and rebuilt on the next cull. */
+  useEffect(() => {
+    flowRef.current = null;
+  }, [reached]);
 
   /* Scroll driver height follows the number of stops actually in use. */
   useEffect(() => {
@@ -222,7 +234,47 @@ export default function Board({
           camRef.current = clampFree({ x, y, s }, vw, vh);
         }
 
-        applyCamera(el, camRef.current, vw, vh);
+        // Writing an identical transform still costs a compositor update,
+        // so skip it entirely when the camera has not actually moved.
+        const cam = camRef.current;
+        const wrote = wroteRef.current;
+        if (
+          !wrote ||
+          Math.abs(cam.x - wrote.x) > 0.05 ||
+          Math.abs(cam.y - wrote.y) > 0.05 ||
+          Math.abs(cam.s - wrote.s) > 0.00005
+        ) {
+          applyCamera(el, cam, vw, vh);
+          wroteRef.current = { ...cam };
+        }
+
+        // Pause the current on traces that have left the frame. Done by
+        // flipping a data attribute a few times a second, never through
+        // React, so scrolling triggers no renders at all.
+        cullTick.current += 1;
+        if (cullTick.current % 10 === 0) {
+          if (!flowRef.current) {
+            flowRef.current = Array.from(
+              el.querySelectorAll<SVGElement>("[data-bbox]"),
+            ).map((node) => {
+              const [x, y, w, h] = (node.dataset.bbox ?? "0,0,0,0")
+                .split(",")
+                .map(Number);
+              return { el: node, x, y, w, h };
+            });
+          }
+          const c = camRef.current;
+          const ww = vw / c.s;
+          const wh = vh / c.s;
+          const vx = c.x - ww / 2;
+          const vy = c.y - wh / 2;
+          for (const f of flowRef.current) {
+            const idle =
+              f.x > vx + ww || f.x + f.w < vx || f.y > vy + wh || f.y + f.h < vy;
+            const next = idle ? "1" : "0";
+            if (f.el.dataset.idle !== next) f.el.dataset.idle = next;
+          }
+        }
 
         const rect = viewRectRef.current;
         if (rect) {
@@ -240,6 +292,21 @@ export default function Board({
 
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
+  }, []);
+
+  /* A background tab should not be burning a phone battery animating copper
+     nobody is looking at. */
+  useEffect(() => {
+    const sync = () => {
+      const hidden = document.visibilityState === "hidden";
+      worldRef.current
+        ?.querySelectorAll<SVGElement>(".flowing")
+        .forEach((el) => {
+          el.style.animationPlayState = hidden ? "paused" : "";
+        });
+    };
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
   }, []);
 
   /* ---- navigation helpers ----------------------------------------------- */
@@ -616,6 +683,13 @@ export default function Board({
                     <span className="silk tabular-nums">
                       {stopI + 1}/{stops.length}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => scrollToStop(stops.length - 1)}
+                      className="silk ml-1 border border-copper px-2 py-1 hover:border-hot hover:text-ink"
+                    >
+                      Contact
+                    </button>
                   </div>
                 ) : (
                 <div className="mt-2 flex gap-1" role="presentation">

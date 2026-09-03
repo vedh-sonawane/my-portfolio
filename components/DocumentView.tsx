@@ -19,7 +19,10 @@ import {
   leadership,
   legend,
   projects,
+  repoUrl,
 } from "@/data/content";
+import type { Project } from "@/data/content";
+import EmailReveal from "@/components/EmailReveal";
 import type { GithubData } from "@/lib/github";
 import type { Transmission } from "@/lib/daily";
 
@@ -65,7 +68,7 @@ function Entry({
             href={href}
             className="text-ink underline decoration-copper underline-offset-4 hover:decoration-hot"
             target="_blank"
-            rel="noreferrer noopener"
+            rel="noopener noreferrer"
           >
             {name}
           </a>
@@ -76,6 +79,41 @@ function Entry({
       </h3>
       {children}
     </article>
+  );
+}
+
+/** Every reachable destination for a project, listed plainly. */
+function ProjectLinks({ project }: { project: Project }) {
+  const repos = project.repos ?? [];
+  if (!project.live && repos.length === 0) return null;
+  return (
+    <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 p-0">
+      {project.live ? (
+        <li className="list-none">
+          <a
+            className="silk underline decoration-hot/40 underline-offset-4 hover:decoration-hot"
+            style={{ color: "var(--color-hot)" }}
+            href={project.live}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Live build
+          </a>
+        </li>
+      ) : null}
+      {repos.map((slug) => (
+        <li key={slug} className="list-none">
+          <a
+            className="silk underline decoration-silk-dim/40 underline-offset-4 hover:decoration-hot"
+            href={repoUrl(slug)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {slug}
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -127,14 +165,13 @@ export default function DocumentView({
             ["GitHub", identity.links.github],
             ["LinkedIn", identity.links.linkedin],
             ["Devpost", identity.links.devpost],
-            ["Email", `mailto:${identity.links.email}`],
           ].map(([label, href]) => (
             <li key={label}>
               <a
                 className="text-hot underline decoration-hot/40 underline-offset-4 hover:decoration-hot"
                 href={href}
                 target={href.startsWith("mailto") ? undefined : "_blank"}
-                rel="noreferrer noopener"
+                rel="noopener noreferrer"
               >
                 {label}
               </a>
@@ -152,9 +189,10 @@ export default function DocumentView({
                 designator={p.designator}
                 name={p.name}
                 meta={p.tech.join(" · ")}
-                href={p.url}
+                href={p.live ?? (p.repos ? repoUrl(p.repos[0]) : undefined)}
               >
                 <p className="mt-2">{p.detail}</p>
+                <ProjectLinks project={p} />
               </Entry>
             ))}
           </div>
@@ -168,9 +206,10 @@ export default function DocumentView({
                 designator={p.designator}
                 name={p.name}
                 meta={p.tech.join(" · ")}
-                href={p.url}
+                href={p.live ?? (p.repos ? repoUrl(p.repos[0]) : undefined)}
               >
                 <p className="mt-2">{p.detail}</p>
+                <ProjectLinks project={p} />
               </Entry>
             ))}
           </div>
@@ -186,6 +225,7 @@ export default function DocumentView({
                     designator={h.designator}
                     name={h.name}
                     meta={`${h.location} · ${h.date}`}
+                    href={h.url}
                   >
                     {built.length > 0 || h.note ? (
                       <p className="mt-1">
@@ -298,20 +338,16 @@ export default function DocumentView({
 
         <Section index="10" title="Terminal · open a connection">
           <ul className="space-y-2">
-            <li>
-              <a
-                className="text-hot underline decoration-hot/40 underline-offset-4"
-                href={`mailto:${identity.links.email}`}
-              >
-                {identity.links.email}
-              </a>
+            <li className="flex flex-wrap items-baseline gap-3">
+              <span className="silk">Email</span>
+              <EmailReveal variant="inline" />
             </li>
             <li>
               <a
                 className="text-hot underline decoration-hot/40 underline-offset-4"
                 href={identity.links.linkedin}
                 target="_blank"
-                rel="noreferrer noopener"
+                rel="noopener noreferrer"
               >
                 linkedin.com/in/vedh-sonawane
               </a>
@@ -321,7 +357,7 @@ export default function DocumentView({
                 className="text-hot underline decoration-hot/40 underline-offset-4"
                 href={identity.links.github}
                 target="_blank"
-                rel="noreferrer noopener"
+                rel="noopener noreferrer"
               >
                 github.com/{identity.githubLogin}
               </a>
@@ -331,7 +367,7 @@ export default function DocumentView({
                 className="text-hot underline decoration-hot/40 underline-offset-4"
                 href={identity.links.devpost}
                 target="_blank"
-                rel="noreferrer noopener"
+                rel="noopener noreferrer"
               >
                 devpost.com/sonawane-vedh14
               </a>

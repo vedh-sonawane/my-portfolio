@@ -18,8 +18,13 @@
  *  no scopes needed for public data). Without it, everything degrades to the
  *  fallback numbers in `data/content.ts` and the site still renders fully.
  *
- *  Cached with `next.revalidate = 3600` so the page is static-fast and the
- *  API is hit at most once an hour.
+ *  Cached with `next.revalidate` (see REVALIDATE_SECONDS) so the page stays
+ *  static-fast and the API is hit at most once per window.
+ *
+ *  NOTE: Next uses stale-while-revalidate. Once the window lapses, the next
+ *  request still receives the cached page while a fresh one is built behind
+ *  it; the request after that gets the new numbers. So a change shows up one
+ *  page load after the window, not on the first.
  * ============================================================================
  */
 
@@ -62,7 +67,16 @@ export interface GithubData {
 }
 
 const ENDPOINT = "https://api.github.com/graphql";
-const REVALIDATE_SECONDS = 3600;
+
+/**
+ * How stale the board is allowed to get.
+ *
+ * The whole query costs about 2 points of GitHub's 5,000-per-hour GraphQL
+ * budget, so refreshing every five minutes uses well under 1% of it. Next
+ * serves the cached page instantly and regenerates behind the request, so a
+ * shorter window costs visitors nothing.
+ */
+const REVALIDATE_SECONDS = 300;
 
 const QUERY = /* GraphQL */ `
   query Board($login: String!) {

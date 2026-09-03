@@ -4,7 +4,7 @@ import DocumentView from "@/components/DocumentView";
 import { dailyTransmission } from "@/lib/daily";
 import { getGithubData } from "@/lib/github";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Portfolio, read straight down",

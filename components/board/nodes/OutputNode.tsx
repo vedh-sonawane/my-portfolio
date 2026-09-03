@@ -144,6 +144,8 @@ export default function OutputNode({
       reached={reached}
       active={active}
       onActivate={onActivate}
+      href={identity.links.github}
+      hrefLabel={`Open github.com/${identity.githubLogin} in a new tab`}
       label={`OUT1: live GitHub output. ${github.totalContributions.toLocaleString(
         "en-CA",
       )} contributions in the past year across ${github.repositories} public repositories.`}

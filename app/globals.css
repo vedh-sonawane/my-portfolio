@@ -1,42 +1,51 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   DESIGN SYSTEM -- "cold black board, cyan traces, one hot solder accent"
-   The accent is scarce on purpose: it only ever means CURRENT / ACTIVE.
+   DESIGN SYSTEM
+   A real board photographed under warm soft light, not an arcade cabinet.
+
+   The substrate is matte solder mask. The metal is bronze copper, not neon.
+   Energised copper shifts to a muted teal. The ONE hot accent, solder amber,
+   is reserved for live current and active state and appears nowhere else,
+   which is the only reason the current reads as alive.
    ========================================================================== */
 
 @theme {
-  /* Substrate */
-  --color-board: #04070a;
-  --color-board-2: #070b11;
-  --color-board-3: #0b1119;
-  --color-mask: #0a1016; /* soldermask fill inside component outlines */
+  /* Solder mask: matte, faintly green-black, never pure black */
+  --color-board: #070b0a;
+  --color-board-2: #0a0f0d;
+  --color-board-3: #101614;
+  --color-mask: #0c1210; /* component body fill */
 
-  /* Copper */
-  --color-copper: #123b46; /* unlit trace */
-  --color-copper-2: #0d2a33; /* deepest trace / ground pour */
-  --color-trace: #2ec9c0; /* lit trace */
-  --color-trace-hi: #6ff2e6; /* lit trace, highlight */
+  /* Copper. Unlit metal is bronze; energised copper is a muted teal. */
+  --color-copper: #6d5334; /* unlit trace, exposed bronze */
+  --color-copper-lit: #9a7549; /* bare pad copper: brighter, it has no mask */
+  --color-copper-2: #3d2f20; /* ground pour, deepest copper */
+  --color-trace: #59a49c; /* energised signal, muted teal-steel */
+  --color-trace-hi: #92c8c0;
 
-  /* Current -- the one hot accent. Solder amber. */
-  --color-hot: #ff9d3d;
-  --color-hot-hi: #ffc785;
+  /* The one hot accent. Solder amber. Current and active state only. */
+  --color-hot: #e8913f;
+  --color-hot-hi: #f7c185;
 
-  /* Silkscreen + type */
-  --color-silk: #8ba3b0; /* printed silkscreen text */
-  --color-silk-dim: #7d8f9b; /* 6.0:1 on --color-board */
-  --color-ink: #dbe7ee; /* body text */
-  --color-ink-dim: #9fb2be;
+  /* Silkscreen and type. Off-white, never pure white. */
+  --color-silk: #cfcbc0;
+  --color-silk-dim: #8c9490;
+  --color-ink: #ddd9d1;
+  --color-ink-dim: #a7aaa3;
 
   /* Halves */
-  --color-physical: #d3bda0; /* perfboard / phenolic tan */
-  --color-digital: #2ec9c0;
+  --color-physical: #c39a6b; /* phenolic perfboard tan */
+  --color-digital: #59a49c;
 
+  /* Telemetry and body: narrow enough to stay legible at 11px */
   --font-mono:
-    var(--font-jetbrains), ui-monospace, "SF Mono", "Cascadia Mono", Menlo,
+    var(--font-mono-face), ui-monospace, "SF Mono", "Cascadia Mono", Menlo,
     Consolas, monospace;
-  --font-display:
-    var(--font-grotesk), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Silkscreen: wide, mechanical, drawn for labelling rather than for code */
+  --font-silk: var(--font-silk-face), var(--font-mono-face), ui-monospace, monospace;
+  /* The name, and only the name */
+  --font-display: var(--font-display-face), Georgia, "Times New Roman", serif;
 }
 
 /* ==========================================================================
@@ -80,7 +89,6 @@ body {
   border-radius: 1px;
 }
 
-/* Skip link */
 .skip-link {
   position: fixed;
   top: 0;
@@ -89,8 +97,9 @@ body {
   padding: 0.6rem 1rem;
   background: var(--color-hot);
   color: #05070a;
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
+  font-family: var(--font-silk);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   transform: translateY(-120%);
   transition: transform 0.14s ease;
@@ -113,83 +122,63 @@ body {
 
 /* ==========================================================================
    TYPE HELPERS
+   Martian Mono is wide by design, so silkscreen runs at a condensed width and
+   needs far less letter-spacing than an ordinary mono would.
    ========================================================================== */
 
 .silk {
+  font-family: var(--font-silk);
+  font-stretch: 75%;
   font-size: 0.625rem;
-  line-height: 1.1;
-  letter-spacing: 0.18em;
+  line-height: 1.3;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--color-silk-dim);
 }
 
 .desig {
+  font-family: var(--font-silk);
+  font-stretch: 75%;
   font-size: 0.625rem;
-  letter-spacing: 0.14em;
-  color: var(--color-hot);
-  opacity: 0.85;
+  letter-spacing: 0.03em;
+  color: var(--color-silk);
+}
+
+/* A reference designator printed on the board beside its part, not on it. */
+.desig-silk {
+  font-family: var(--font-silk);
+  font-stretch: 75%;
+  letter-spacing: 0.04em;
+  color: var(--color-silk);
+  opacity: 0.7;
 }
 
 /* ==========================================================================
    BOARD TEXTURES
-   Physical half = perfboard drill grid. Digital half = etched copper hatch.
-   Both are pure CSS so they cost nothing to paint.
+   All three are tiled SVG files, so the browser rasterises one small tile and
+   repeats it instead of evaluating a gradient across 16.7 million pixels.
    ========================================================================== */
 
-.tex-perfboard {
+.tex-pour-physical {
   background-color: var(--color-board-2);
-  background-image:
-    radial-gradient(
-      circle at center,
-      color-mix(in oklab, var(--color-physical) 26%, transparent) 0 1.1px,
-      transparent 1.4px
-    ),
-    radial-gradient(
-      circle at center,
-      color-mix(in oklab, #000 70%, transparent) 0 2.6px,
-      transparent 3px
-    );
-  background-size:
-    32px 32px,
-    32px 32px;
-  background-position:
-    0 0,
-    0 0;
+  background-image: url("/tex/pour-physical.svg"), url("/tex/grain.svg");
+  background-size: 32px 32px, 64px 64px;
 }
 
-.tex-etched {
+.tex-pour-digital {
   background-color: var(--color-board-2);
-  background-image:
-    repeating-linear-gradient(
-      90deg,
-      color-mix(in oklab, var(--color-copper) 40%, transparent) 0 1px,
-      transparent 1px 64px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      color-mix(in oklab, var(--color-copper) 28%, transparent) 0 1px,
-      transparent 1px 64px
-    );
+  background-image: url("/tex/pour-digital.svg"), url("/tex/grain.svg");
+  background-size: 32px 32px, 64px 64px;
 }
 
-/* Fine grain over the whole board -- fibreglass weave, not noise-for-noise's-sake */
 .tex-grain {
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.014) 0 1px,
-      transparent 1px 3px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      rgba(0, 0, 0, 0.05) 0 1px,
-      transparent 1px 3px
-    );
+  background-image: url("/tex/grain.svg");
+  background-size: 64px 64px;
 }
 
 /* ==========================================================================
    CURRENT FLOW
-   One keyframe drives every animated trace. Speed varies by dash length.
+   One keyframe drives every animated trace, on stroke-dashoffset only.
    ========================================================================== */
 
 @keyframes flow {
@@ -219,26 +208,20 @@ body {
   }
 }
 
-@keyframes shimmer {
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 0.85;
-  }
-}
-
 .flowing {
   animation: flow calc(6s / var(--flow)) linear infinite;
+}
+
+/* Traces outside the viewport stop animating: no ticking, no compositing. */
+.flowing[data-idle="1"] {
+  animation-play-state: paused;
 }
 
 /* ==========================================================================
    LEVEL OF DETAIL
    --cam-scale is written to the world container by the camera loop. Fine
-   silkscreen only resolves once you are actually close enough to read it,
-   which is both how a real board behaves and a free performance win when the
-   camera is pulled all the way back.
+   silkscreen only resolves once you are close enough to read it, which is
+   both how a real board behaves and a free performance win when zoomed out.
    ========================================================================== */
 
 .lod-fine {
@@ -250,7 +233,7 @@ body {
 
 /* ==========================================================================
    REDUCED MOTION
-   The current does not stop -- it slows to a breath. Everything else calms.
+   The current does not stop, it slows to a breath. Everything else calms.
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -272,16 +255,19 @@ body {
 }
 
 /* ==========================================================================
-   DOCUMENT VIEW -- the plain, linear reading of the same content.
-   Also what you get with JavaScript off.
+   DOCUMENT VIEW
+   The plain, linear reading of the same content. Also what you get with
+   JavaScript off.
    ========================================================================== */
 
 .doc {
   --measure: 68ch;
 }
 .doc h2 {
+  font-family: var(--font-silk);
+  font-stretch: 75%;
   font-size: 0.6875rem;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-hot);
 }

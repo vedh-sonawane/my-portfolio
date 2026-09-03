@@ -3,8 +3,8 @@ import Board from "@/components/board/Board";
 import { dailyTransmission } from "@/lib/daily";
 import { getGithubData, voltageFrom } from "@/lib/github";
 
-/** Live GitHub data is cached for an hour; see lib/github.ts. */
-export const revalidate = 3600;
+/** Live GitHub data is refreshed at most every 5 minutes; see lib/github.ts. */
+export const revalidate = 300;
 
 export default async function Home() {
   const github = await getGithubData();

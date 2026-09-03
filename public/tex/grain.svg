@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Solder-mask grain: the woven fibreglass under the mask, barely there. -->
+  <g stroke="rgb(255,255,255)" stroke-opacity="0.016" stroke-width="1">
+    <path d="M0 8 h64 M0 24 h64 M0 40 h64 M0 56 h64"/>
+  </g>
+  <g stroke="rgb(0,0,0)" stroke-opacity="0.05" stroke-width="1">
+    <path d="M8 0 v64 M24 0 v64 M40 0 v64 M56 0 v64"/>
+  </g>
+</svg>

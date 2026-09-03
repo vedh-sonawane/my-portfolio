@@ -1,18 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Instrument_Serif, Martian_Mono, Spline_Sans_Mono } from "next/font/google";
 import { identity } from "@/data/content";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
-const jetbrains = JetBrains_Mono({
+/**
+ * Three faces, three jobs, none of them a code-editor default.
+ *
+ *   Martian Mono      the silkscreen. Wide, mechanical, drawn for labelling
+ *                     rather than for reading code. Short uppercase strings
+ *                     only: designators, telemetry keys, HUD chrome.
+ *   Spline Sans Mono  the telemetry readout. Narrow enough to stay legible at
+ *                     11px inside a component body, with more character than
+ *                     the usual monospace.
+ *   Instrument Serif  the name. A sharp editorial serif is the last thing you
+ *                     expect on a circuit board, which is exactly why the
+ *                     identity stops reading as a template.
+ */
+const silk = Martian_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains",
+  variable: "--font-silk-face",
+  display: "swap",
+  axes: ["wdth"],
+});
+
+const mono = Spline_Sans_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-face",
   display: "swap",
 });
 
-const grotesk = Space_Grotesk({
+const display = Instrument_Serif({
   subsets: ["latin"],
-  variable: "--font-grotesk",
+  variable: "--font-display-face",
+  weight: "400",
   display: "swap",
 });
 
@@ -72,7 +93,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${jetbrains.variable} ${grotesk.variable}`}>
+    <html
+      lang="en"
+      className={`${mono.variable} ${silk.variable} ${display.variable}`}
+    >
       <body>
         <a className="skip-link" href="#content">
           Skip to content

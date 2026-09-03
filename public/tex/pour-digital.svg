@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Ground pour, digital half: the classic cross-hatched copper flood used
+       on real boards so the pour does not warp during reflow. -->
+  <g stroke="rgb(89,164,156)" stroke-opacity="0.11" stroke-width="1" fill="none">
+    <path d="M0 16 L16 0" />
+    <path d="M0 32 L32 0" />
+    <path d="M16 32 L32 16" />
+    <path d="M0 16 L16 32" />
+    <path d="M0 0 L32 32" />
+    <path d="M16 0 L32 16" />
+  </g>
+  <g stroke="rgb(109,83,52)" stroke-opacity="0.13" stroke-width="1" fill="none">
+    <path d="M0 0.5 L32 0.5" />
+    <path d="M0.5 0 L0.5 32" />
+  </g>
+</svg>

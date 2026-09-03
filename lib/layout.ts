@@ -211,9 +211,9 @@ export const STOPS: Stop[] = [
   {
     id: "seam",
     label: "The crossover",
-    rect: { x: 1760, y: 920, w: 820, h: 820 },
-    mobileRect: { x: 1840, y: 940, w: 660, h: 800 },
-    maxScale: 1.25,
+    rect: { x: 1680, y: 980, w: 940, h: 950 },
+    mobileRect: { x: 1700, y: 1180, w: 900, h: 760 },
+    maxScale: 1.1,
   },
   {
     id: "rail-a",

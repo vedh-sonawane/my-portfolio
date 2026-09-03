@@ -1,17 +1,22 @@
 "use client";
 
 /**
- * THE SUBSTRATE -- two halves of board and the seam that joins them.
+ * THE SUBSTRATE: two halves of board and the seam that joins them.
  *
  * Left of the seam is perfboard: drilled phenolic, hand-built, physical.
  * Right of it is etched copper: fabricated, precise, digital.
  *
- * The seam is the whole argument of the site, so it is drawn deliberately: a
- * torn perfboard edge on one side, an etch-resist edge on the other, a column
- * of stitching vias down the middle, and real selectable labels either side of
- * the point where the current crosses.
+ * There is no empty black anywhere, because a real board floods its unrouted
+ * area with a hatched copper GROUND POUR. Each half gets a pour tinted to its
+ * own copper, tiled from a 32px SVG so the browser rasterises one small tile
+ * instead of evaluating a gradient across sixteen million pixels.
+ *
+ * The seam is the argument the whole site is making, so it is drawn
+ * deliberately: a torn perfboard edge on one side, an etch-resist edge on the
+ * other, stitching vias down the middle, and the tagline printed across it.
  */
 
+import { identity } from "@/data/content";
 import { SEAM, WORLD } from "@/lib/layout";
 
 export default function Substrate({ reached }: { reached: number }) {
@@ -19,44 +24,61 @@ export default function Substrate({ reached }: { reached: number }) {
 
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-      {/* ---- physical half: perfboard ------------------------------------ */}
+      {/* ---- physical half: perfboard over a warm copper pour ------------- */}
       <div
-        className="tex-perfboard absolute top-0 left-0 h-full"
+        className="tex-pour-physical absolute top-0 left-0 h-full"
         style={{
           width: SEAM.mid,
-          opacity: powered ? 0.95 : 0.4,
+          opacity: powered ? 1 : 0.5,
           transition: "opacity 1200ms ease",
         }}
       />
 
-      {/* ---- digital half: etched copper --------------------------------- */}
+      {/* ---- digital half: etched copper over a cross-hatched pour -------- */}
       <div
-        className="tex-etched absolute top-0 h-full"
+        className="tex-pour-digital absolute top-0 h-full"
         style={{
           left: SEAM.mid,
           width: WORLD.w - SEAM.mid,
-          opacity: powered ? 0.95 : 0.4,
+          opacity: powered ? 1 : 0.5,
           transition: "opacity 1200ms ease",
         }}
       />
 
-      {/* ---- ground pour glow, driven by board voltage -------------------- */}
+      {/* ---- the light falling on the board, driven by board voltage ------
+           One gradient, not three. It is the sheen of a mask under a lamp,
+           not a glow effect. */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 90% at 12% 82%, color-mix(in oklab, var(--color-hot) calc(var(--voltage) * 10%), transparent) 0%, transparent 55%), radial-gradient(90% 80% at 84% 55%, color-mix(in oklab, var(--color-trace) calc(var(--voltage) * 11%), transparent) 0%, transparent 60%)",
-          opacity: powered ? 1 : 0.15,
+            "radial-gradient(115% 95% at 16% 78%, color-mix(in oklab, var(--color-physical) calc(var(--voltage) * 7%), transparent) 0%, transparent 58%)",
+          opacity: powered ? 1 : 0.2,
           transition: "opacity 1600ms ease",
         }}
       />
+
+      {/* ---- silkscreen watermark, printed into the pour ------------------ */}
+      <p
+        className="desig-silk absolute m-0"
+        style={{
+          left: 2620,
+          top: 2200,
+          fontSize: 230,
+          lineHeight: 1,
+          opacity: 0.028,
+          letterSpacing: "0.08em",
+        }}
+      >
+        CURRENT
+      </p>
 
       {/* ---- the seam ---------------------------------------------------- */}
       <div
         className="absolute top-0 h-full"
         style={{ left: SEAM.from, width: SEAM.to - SEAM.from }}
       >
-        {/* the board is cut here: bare substrate, no copper pour */}
+        {/* the board is cut here: bare substrate, no copper pour at all */}
         <div className="absolute inset-0" style={{ background: "var(--color-board)" }} />
 
         {/* torn perfboard edge on the left, etch resist on the right */}
@@ -64,14 +86,14 @@ export default function Substrate({ reached }: { reached: number }) {
           className="absolute inset-y-0 -left-1 w-[3px]"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(180deg, color-mix(in oklab, var(--color-physical) 75%, transparent) 0 9px, transparent 9px 22px)",
+              "repeating-linear-gradient(180deg, color-mix(in oklab, var(--color-physical) 70%, transparent) 0 9px, transparent 9px 22px)",
           }}
         />
         <div
           className="absolute inset-y-0 -right-1 w-[3px]"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(180deg, color-mix(in oklab, var(--color-trace) 60%, transparent) 0 26px, transparent 26px 10px)",
+              "repeating-linear-gradient(180deg, color-mix(in oklab, var(--color-trace) 55%, transparent) 0 26px, transparent 26px 10px)",
           }}
         />
 
@@ -80,88 +102,100 @@ export default function Substrate({ reached }: { reached: number }) {
           className="absolute inset-0"
           style={{
             backgroundImage:
-              "radial-gradient(circle, color-mix(in oklab, var(--color-copper) 90%, transparent) 0 4px, transparent 4.6px)",
+              "radial-gradient(circle, var(--color-copper) 0 4px, transparent 4.6px)",
             backgroundSize: "100% 96px",
             backgroundPosition: "center top",
-            opacity: powered ? 0.9 : 0.4,
+            opacity: powered ? 0.8 : 0.35,
             transition: "opacity 1200ms ease",
           }}
         />
       </div>
 
-      {/* ---- the two halves, named, standing either side of the cut ------
-           Set vertically on the flanks of the seam the way board-edge
-           silkscreen actually runs, and clear of every trace and part. */}
+      {/* ---- the two halves, named, standing either side of the cut ------- */}
       <p
-        className="absolute m-0 text-center"
+        className="desig-silk absolute m-0 text-center"
         style={{
           left: SEAM.from - 82,
-          top: SEAM.crossY - 420,
+          top: SEAM.crossY - 400,
           width: 60,
           writingMode: "vertical-rl",
-          fontSize: 38,
-          letterSpacing: "0.24em",
-          color: "color-mix(in oklab, var(--color-physical) 82%, transparent)",
+          fontSize: 34,
+          letterSpacing: "0.2em",
+          color: "var(--color-physical)",
+          opacity: 0.62,
         }}
       >
         PHYSICAL
       </p>
       <p
-        className="absolute m-0 text-center"
+        className="desig-silk absolute m-0 text-center"
         style={{
           left: SEAM.to + 24,
-          top: SEAM.crossY - 400,
+          top: SEAM.crossY - 380,
           width: 60,
           writingMode: "vertical-rl",
-          fontSize: 38,
-          letterSpacing: "0.24em",
-          color: "color-mix(in oklab, var(--color-trace) 78%, transparent)",
+          fontSize: 34,
+          letterSpacing: "0.2em",
+          color: "var(--color-trace)",
+          opacity: 0.62,
         }}
       >
         DIGITAL
       </p>
 
-      {/* ---- crossover callout, sitting just under the jumper ------------- */}
+      {/* ---- THE TAGLINE, printed across the crossover --------------------
+           This is the one place on the board where the sentence and the
+           picture say the same thing, so it belongs here and nowhere else. */}
+      <p
+        className="desig-silk absolute m-0 text-center"
+        style={{
+          left: SEAM.mid - 300,
+          top: SEAM.crossY + 58,
+          width: 600,
+          fontSize: 19,
+          letterSpacing: "0.24em",
+          opacity: 0.55,
+        }}
+      >
+        CROSSOVER 01
+      </p>
+
       <div
         className="absolute"
-        style={{ left: SEAM.mid - 560, top: SEAM.crossY + 62, width: 1120 }}
+        style={{ left: SEAM.mid - 500, top: SEAM.crossY + 320, width: 1000 }}
       >
         <p
-          className="m-0 text-center uppercase"
-          style={{
-            fontSize: 21,
-            letterSpacing: "0.3em",
-            color: "var(--color-silk)",
-          }}
+          className="font-display m-0 text-center"
+          style={{ fontSize: 44, lineHeight: 1.15, color: "var(--color-silk)" }}
         >
-          Crossover 01
+          {identity.tagline}
         </p>
         <p
-          className="m-0 mt-3 text-center"
-          style={{ fontSize: 17, letterSpacing: "0.08em", color: "var(--color-silk-dim)" }}
+          className="desig-silk m-0 mt-4 text-center"
+          style={{ fontSize: 16, letterSpacing: "0.06em", opacity: 0.5 }}
         >
-          the copper stops and a wire carries it across
+          the etched copper stops here and a soldered wire carries it across
         </p>
       </div>
 
-      {/* ---- repeated silkscreen along the seam, for texture -------------- */}
+      {/* ---- repeated seam silkscreen, for texture ------------------------ */}
       {[-2, -1, 1, 2].map((k) => (
         <div
           key={k}
           className="absolute"
           style={{
             left: SEAM.from,
-            top: SEAM.crossY + k * 760 - 180,
+            top: SEAM.crossY + k * 780 - 180,
             width: SEAM.to - SEAM.from,
           }}
         >
           <p
-            className="m-0 text-center"
+            className="desig-silk m-0 text-center"
             style={{
               writingMode: "vertical-rl",
-              fontSize: 15,
-              letterSpacing: "0.5em",
-              color: "color-mix(in oklab, var(--color-silk) 34%, transparent)",
+              fontSize: 13,
+              letterSpacing: "0.3em",
+              opacity: 0.24,
             }}
           >
             PHYSICAL // DIGITAL
@@ -169,15 +203,13 @@ export default function Substrate({ reached }: { reached: number }) {
         </div>
       ))}
 
-      {/* ---- board edge and grain ---------------------------------------- */}
+      {/* ---- board edge -------------------------------------------------- */}
       <div
         className="absolute inset-0"
         style={{
-          border: "2px solid color-mix(in oklab, var(--color-copper) 80%, transparent)",
-          boxShadow: "inset 0 0 90px rgba(0,0,0,.75)",
+          border: "2px solid color-mix(in oklab, var(--color-copper) 90%, transparent)",
         }}
       />
-      <div className="tex-grain absolute inset-0" style={{ opacity: 0.7 }} />
     </div>
   );
 }

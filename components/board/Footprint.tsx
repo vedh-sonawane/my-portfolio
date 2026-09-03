@@ -105,8 +105,8 @@ export default function Footprint({ kind, w, h, lit, hot }: FootprintProps) {
     >
       {kind === "dip" ? (
         <>
-          <Pins count={8} from={14} to={h - 14} axis="y" at={2} len={26} lit={lit} hot={hot} />
-          <Pins count={8} from={14} to={h - 14} axis="y" at={w - 28} len={26} lit={lit} hot={hot} />
+          <Pins count={6} from={14} to={h - 14} axis="y" at={2} len={26} lit={lit} hot={hot} />
+          <Pins count={6} from={14} to={h - 14} axis="y" at={w - 28} len={26} lit={lit} hot={hot} />
           <rect x={28} y={4} width={w - 56} height={h - 8} rx={3} fill={bodyFill} />
           <rect x={28} y={4} width={w - 56} height={h - 8} rx={3} {...outline} />
           {/* pin-1 marker */}
@@ -116,8 +116,8 @@ export default function Footprint({ kind, w, h, lit, hot }: FootprintProps) {
 
       {kind === "soic" ? (
         <>
-          <Pins count={6} from={10} to={h - 10} axis="y" at={2} len={18} lit={lit} hot={hot} />
-          <Pins count={6} from={10} to={h - 10} axis="y" at={w - 20} len={18} lit={lit} hot={hot} />
+          <Pins count={5} from={10} to={h - 10} axis="y" at={2} len={18} lit={lit} hot={hot} />
+          <Pins count={5} from={10} to={h - 10} axis="y" at={w - 20} len={18} lit={lit} hot={hot} />
           <rect x={20} y={4} width={w - 40} height={h - 8} rx={2} fill={bodyFill} />
           <rect x={20} y={4} width={w - 40} height={h - 8} rx={2} {...outline} />
           <circle cx={33} cy={17} r={3.5} fill={silk} />
@@ -126,10 +126,10 @@ export default function Footprint({ kind, w, h, lit, hot }: FootprintProps) {
 
       {kind === "qfp" ? (
         <>
-          <Pins count={9} from={30} to={h - 30} axis="y" at={4} len={24} lit={lit} hot={hot} />
-          <Pins count={9} from={30} to={h - 30} axis="y" at={w - 28} len={24} lit={lit} hot={hot} />
-          <Pins count={9} from={30} to={w - 30} axis="x" at={4} len={24} lit={lit} hot={hot} />
-          <Pins count={9} from={30} to={w - 30} axis="x" at={h - 28} len={24} lit={lit} hot={hot} />
+          <Pins count={6} from={30} to={h - 30} axis="y" at={4} len={24} lit={lit} hot={hot} />
+          <Pins count={6} from={30} to={h - 30} axis="y" at={w - 28} len={24} lit={lit} hot={hot} />
+          <Pins count={6} from={30} to={w - 30} axis="x" at={4} len={24} lit={lit} hot={hot} />
+          <Pins count={6} from={30} to={w - 30} axis="x" at={h - 28} len={24} lit={lit} hot={hot} />
           <rect x={28} y={28} width={w - 56} height={h - 56} rx={4} fill={bodyFill} />
           <rect x={28} y={28} width={w - 56} height={h - 56} rx={4} {...outline} />
           <circle cx={48} cy={48} r={7} fill="none" stroke={silk} strokeWidth={2} />
@@ -153,8 +153,8 @@ export default function Footprint({ kind, w, h, lit, hot }: FootprintProps) {
               <circle cx={cx} cy={cy} r={2.5} fill="var(--color-board)" />
             </g>
           ))}
-          {Array.from({ length: 8 }, (_, i) => {
-            const x = w / 2 - 4 * 26 + i * 26 + 13;
+          {Array.from({ length: 6 }, (_, i) => {
+            const x = w / 2 - 3 * 26 + i * 26 + 13;
             return (
               <g key={i}>
                 <rect

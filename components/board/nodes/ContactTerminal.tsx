@@ -1,21 +1,50 @@
 "use client";
 
 /**
- * TB1 -- the output terminal, where the trace ends.
- * Four screw terminals, each one a way to reach him. This is the only place on
- * the board where the current is allowed to leave.
+ * TB1: the output terminal, where the trace ends.
+ *
+ * A screw terminal block. Three pins are wired; the fourth, the email, is
+ * drawn as an OPEN circuit and stays that way until a visitor closes it. The
+ * screw glyph lives inside its own row rather than in the backing SVG, so it
+ * stays aligned with its label no matter how the rows reflow.
  */
 
 import { identity } from "@/data/content";
 import type { BoardNode } from "@/lib/layout";
 import Node from "@/components/board/Node";
+import EmailReveal from "@/components/EmailReveal";
 
-const TERMINALS = [
-  { label: "Email", value: identity.links.email, href: `mailto:${identity.links.email}` },
+const WIRED = [
   { label: "LinkedIn", value: "vedh-sonawane", href: identity.links.linkedin },
   { label: "GitHub", value: identity.githubLogin, href: identity.links.github },
   { label: "Devpost", value: "sonawane-vedh14", href: identity.links.devpost },
 ];
+
+/** A slotted screw head, sized to sit on a text baseline. */
+function Screw({ open = false }: { open?: boolean }) {
+  const c = open ? "var(--color-copper-lit)" : "var(--color-trace)";
+  return (
+    <svg
+      width={26}
+      height={26}
+      viewBox="0 0 26 26"
+      className="shrink-0"
+      aria-hidden="true"
+      style={{ transform: "translateY(4px)" }}
+    >
+      <circle cx={13} cy={13} r={11} fill="none" stroke={c} strokeWidth={2} />
+      <line
+        x1={open ? 7 : 6}
+        y1={open ? 19 : 13}
+        x2={open ? 19 : 20}
+        y2={open ? 7 : 13}
+        stroke={c}
+        strokeWidth={2.4}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 export default function ContactTerminal({
   node,
@@ -39,51 +68,19 @@ export default function ContactTerminal({
       onActivate={onActivate}
       label="TB1: output terminal. Contact links."
     >
-      <svg
-        className="absolute inset-0 h-full w-full"
-        viewBox={`0 0 ${node.w} ${node.h}`}
-        aria-hidden="true"
-      >
-        <rect
-          x={4}
-          y={4}
-          width={node.w - 8}
-          height={node.h - 8}
-          rx={4}
-          fill="var(--color-mask)"
-          stroke={hot ? "var(--color-hot)" : "var(--color-silk)"}
-          strokeWidth={2.5}
-        />
-        {/* one screw head per terminal, aligned to its row */}
-        {TERMINALS.map((_, i) => {
-          const cy = 92 + i * 44;
-          return (
-            <g key={i}>
-              <circle
-                cx={34}
-                cy={cy}
-                r={13}
-                fill="none"
-                stroke={powered ? "var(--color-hot)" : "var(--color-copper)"}
-                strokeWidth={2}
-              />
-              <line
-                x1={26}
-                y1={cy}
-                x2={42}
-                y2={cy}
-                stroke={powered ? "var(--color-hot)" : "var(--color-copper)"}
-                strokeWidth={2.5}
-              />
-            </g>
-          );
-        })}
-      </svg>
+      <div
+        className="absolute inset-0"
+        style={{
+          border: `2.5px solid ${hot ? "var(--color-hot)" : "var(--color-copper-lit)"}`,
+          background: "var(--color-mask)",
+          transition: "border-color 300ms ease",
+        }}
+      />
 
       <div
         className="relative h-full"
         style={{
-          padding: "20px 22px 20px 66px",
+          padding: "20px 22px",
           opacity: powered ? 1 : 0,
           transition: "opacity 600ms ease 420ms",
         }}
@@ -91,21 +88,29 @@ export default function ContactTerminal({
         <p className="desig m-0" style={{ fontSize: 13 }}>
           TB1 · Open a connection
         </p>
-        <ul className="m-0 mt-4 space-y-[21px] p-0">
-          {TERMINALS.map((t) => (
-            <li key={t.label} className="list-none leading-none">
+
+        <ul className="m-0 mt-3.5 space-y-3 p-0">
+          <li className="flex list-none items-start gap-3">
+            <Screw open />
+            <span className="silk w-[74px] shrink-0 pt-1" style={{ fontSize: 12 }}>
+              Email
+            </span>
+            <EmailReveal />
+          </li>
+
+          {WIRED.map((t) => (
+            <li key={t.label} className="flex list-none items-start gap-3">
+              <Screw />
+              <span className="silk w-[74px] shrink-0 pt-1" style={{ fontSize: 12 }}>
+                {t.label}
+              </span>
               <a
                 href={t.href}
-                target={t.href.startsWith("mailto") ? undefined : "_blank"}
-                rel="noreferrer noopener"
-                className="group flex items-baseline gap-3"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pt-0.5 text-[17px] text-ink underline decoration-copper decoration-1 underline-offset-4 hover:decoration-hot"
               >
-                <span className="silk w-[84px] shrink-0" style={{ fontSize: 12 }}>
-                  {t.label}
-                </span>
-                <span className="text-[19px] text-ink underline decoration-copper decoration-1 underline-offset-4 group-hover:decoration-hot">
-                  {t.value}
-                </span>
+                {t.value}
               </a>
             </li>
           ))}

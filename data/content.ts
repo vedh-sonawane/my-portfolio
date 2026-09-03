@@ -52,7 +52,14 @@ export interface Project {
   /** Expanded readout, shown on hover / focus. */
   detail: string;
   tech: string[];
-  url?: string;
+  /**
+   * Repository slugs under github.com/<githubLogin>/. repos[0] is what the
+   * node itself opens; the rest are listed in the readout. Every slug here was
+   * checked against the live GitHub API, so none of these 404.
+   */
+  repos?: string[];
+  /** A deployment a visitor can actually open. Verified reachable. */
+  live?: string;
   /** id of the hackathon this was built at -- draws a cross-wire on the board. */
   origin?: string;
 }
@@ -67,6 +74,12 @@ export interface Hackathon {
   /** Machine-sortable, for the chronological left-to-right rail. */
   sort: string;
   note?: string;
+  /**
+   * The event's own page. Devpost has no API, so these are hand-checked.
+   * Left undefined where no public page could be confirmed: an absent link is
+   * honest, an invented one is a 404.
+   */
+  url?: string;
 }
 
 /* --------------------------------------------------------------------------
@@ -88,13 +101,19 @@ export const identity = {
     github: "https://github.com/vedh-sonawane",
     devpost: "https://devpost.com/sonawane-vedh14",
     linkedin: "https://www.linkedin.com/in/vedh-sonawane-60a0753bb/",
-    email: "sonawane.vedh14@gmail.com",
   },
+  /**
+   * The email, in fragments. Joined only in the browser (see lib/email.ts) so
+   * no contiguous copy of the address ever reaches the server-rendered HTML,
+   * which is what address harvesters read. Edit the pieces, not a whole
+   * string, and keep them split.
+   */
+  emailParts: ["sonawane", ".vedh14", "@", "gmail", ".com"],
   githubLogin: "vedh-sonawane",
   /** Used verbatim when the live GitHub API is unreachable. */
   fallbackStats: {
-    repositories: 43,
-    contributions: 9987,
+    repositories: 30,
+    contributions: 9991,
     followers: 8,
   },
 };
@@ -102,6 +121,10 @@ export const identity = {
 /* --------------------------------------------------------------------------
    PROJECTS -- half: "physical" = left of the seam, "digital" = right of it
    -------------------------------------------------------------------------- */
+
+/** Full URL for a repository slug. */
+export const repoUrl = (slug: string) =>
+  `https://github.com/${identity.githubLogin}/${slug}`;
 
 export const projects: Project[] = [
   /* -- PHYSICAL HALF ----------------------------------------------------- */
@@ -116,6 +139,7 @@ export const projects: Project[] = [
     detail:
       "An RC-car chassis rebuilt into an autonomous assistant: Arduino motor control underneath, computer vision on top, and onboard decision-making that closes the loop between what it sees and where it drives. Sensors feed obstacle and target data back into the control layer in real time.",
     tech: ["Python", "OpenCV", "Arduino"],
+    repos: ["rover"],
   },
   {
     id: "kivo",
@@ -126,8 +150,9 @@ export const projects: Project[] = [
     featured: true,
     blurb: "AI physical desk companion built on an Arduino Uno.",
     detail:
-      "A desk companion that is equal parts firmware and intelligence: embedded C++ on an Arduino Uno drives the hardware and motion, while a Python layer handles the reasoning and automation. The two halves talk over serial -- the clearest small example of software leaving the screen.",
+      "A desk companion that is equal parts firmware and intelligence: embedded C++ on an Arduino Uno drives the hardware and motion, while a Python layer handles the reasoning and automation. The two halves talk over serial, which is the clearest small example of software leaving the screen.",
     tech: ["Python", "C++", "Arduino"],
+    repos: ["kivo"],
   },
   {
     id: "breezebrain",
@@ -139,6 +164,7 @@ export const projects: Project[] = [
     detail:
       "Continuous temperature monitoring drives automatic fan-speed control, with real-time telemetry on an LCD and interactive controls for overriding the curve. A closed control loop you can hold your hand in front of and watch respond.",
     tech: ["C++", "Arduino"],
+    repos: ["breeze_brain"],
   },
 
   /* -- DIGITAL HALF ------------------------------------------------------ */
@@ -151,8 +177,9 @@ export const projects: Project[] = [
     featured: true,
     blurb: "Local AI command centre for Windows.",
     detail:
-      "A single command palette that sits over the whole machine: system monitoring, project management, file search, and persistent memory, with sandboxed AI tool-calling so the model can actually act instead of only answering. Runs locally -- nothing leaves the desk.",
+      "A single command palette that sits over the whole machine: system monitoring, project management, file search, and persistent memory, with sandboxed AI tool-calling so the model can actually act instead of only answering. Runs locally, so nothing leaves the desk.",
     tech: ["Python", "LLM tool calling"],
+    repos: ["destiny"],
   },
   {
     id: "volo",
@@ -165,6 +192,7 @@ export const projects: Project[] = [
     detail:
       "Give it a high-level goal and it produces a finished outcome, not a plan: it researches, decomposes the goal into steps, and executes end-to-end, reporting what it did at each stage.",
     tech: ["TypeScript"],
+    repos: ["volo"],
   },
   {
     id: "vibecheck",
@@ -176,9 +204,10 @@ export const projects: Project[] = [
     blurb:
       "Slack team-health agent that flags burnout and resignation risk weeks early.",
     detail:
-      "Reads behavioural signals only -- response timing, participation patterns, thread engagement -- and never message content, which is what makes it deployable at all. Surfaces risk weeks before someone hands in notice. Built on the Canvas API, Block Kit and MCP.",
+      "Reads behavioural signals only (response timing, participation patterns, thread engagement) and never message content, which is what makes it deployable at all. Surfaces risk weeks before someone hands in notice. Built on the Canvas API, Block Kit and MCP.",
     tech: ["Node.js", "TypeScript", "PostgreSQL", "Slack API"],
     origin: "slack-agent",
+    repos: ["vibecheck"],
   },
   {
     id: "neural-flux",
@@ -189,9 +218,11 @@ export const projects: Project[] = [
     featured: true,
     blurb: "A game where you play as the AI answering humans under time pressure.",
     detail:
-      "Role reversal as a game mechanic: you are the model, the requests keep coming, and the clock is running. Scenarios are AI-generated fresh each run, and you are scored on both speed and judgment -- which turns out to be a surprisingly good argument about what these systems are actually doing.",
+      "Role reversal as a game mechanic: you are the model, the requests keep coming, and the clock is running. Scenarios are AI-generated fresh each run, and you are scored on both speed and judgment, which turns out to be a surprisingly good argument about what these systems are actually doing.",
     tech: ["TypeScript"],
     origin: "deltahacks-12",
+    repos: ["neural-flux"],
+    live: "https://neural-flux-rg5p.vercel.app/",
   },
   {
     id: "promptdeck",
@@ -201,8 +232,9 @@ export const projects: Project[] = [
     footprint: "soic",
     blurb: "One prompt in, a full Google Slides deck out.",
     detail:
-      "Turns a single prompt into a complete presentation -- dynamic themes, generated structure, and real sourced images rather than placeholder boxes. Groq handles inference; FastAPI does the slide assembly.",
+      "Turns a single prompt into a complete presentation: dynamic themes, generated structure, and real sourced images rather than placeholder boxes. Groq handles inference; FastAPI does the slide assembly.",
     tech: ["Next.js", "FastAPI", "Groq"],
+    repos: ["prompt-deck"],
   },
   {
     id: "bytee",
@@ -214,6 +246,8 @@ export const projects: Project[] = [
     detail:
       "Tracks what you actually have, warns before it expires, suggests recipes from current inventory, and lets neighbours share surplus instead of binning it.",
     tech: ["TypeScript"],
+    repos: ["bytee"],
+    live: "https://bytee-six.vercel.app/",
   },
   {
     id: "eurekahacks-portal",
@@ -227,6 +261,8 @@ export const projects: Project[] = [
       "Multi-step registration with draft autosave on the applicant side; on the organizer side, a dashboard for scoring applications, making accept/reject decisions, and firing automated decision emails. Built for EurekaHacks after competing there.",
     tech: ["React", "TypeScript", "PostgreSQL", "serverless"],
     origin: "eurekahacks-2026",
+    repos: ["eurekawebdev"],
+    live: "https://eureka-vedh.vercel.app/",
   },
   {
     id: "vow",
@@ -237,9 +273,9 @@ export const projects: Project[] = [
     featured: true,
     blurb: "Group-habit PWA where the streak belongs to everyone.",
     detail:
-      "Small groups make one shared daily commitment. Miss it without spending a wildcard and the whole group's streak resets -- the social stake is the product. Google auth, row-level security, realtime sync, and browser-native Web Push fired from a Vercel cron.",
+      "Small groups make one shared daily commitment. Miss it without spending a wildcard and the whole group's streak resets. The social stake is the product. Google auth, row-level security, realtime sync, and browser-native Web Push fired from a Vercel cron.",
     tech: ["Next.js 15", "TypeScript", "Supabase", "Tailwind v4"],
-    url: "https://vow-three.vercel.app",
+    live: "https://vow-three.vercel.app",
   },
   {
     id: "ml-from-scratch",
@@ -247,10 +283,17 @@ export const projects: Project[] = [
     name: "ML From Scratch",
     half: "digital",
     footprint: "soic",
-    blurb: "Linear regression, KNN, SVM and diagnostics -- no scikit-learn.",
+    blurb: "Linear regression, KNN, SVM and diagnostics, with no scikit-learn.",
     detail:
       "Every algorithm implemented from first principles in NumPy, including the classification diagnostics used to evaluate them. Written to understand the maths rather than to call the library.",
     tech: ["Python", "NumPy"],
+    // Four repositories, one per algorithm, built separately.
+    repos: [
+      "linear-regression",
+      "knn-nearest-neighbours",
+      "svm-support-vector-machines",
+      "classification-model-diagnostic-simulator",
+    ],
   },
   {
     id: "fraudgen",
@@ -262,6 +305,7 @@ export const projects: Project[] = [
     detail:
       "Generates new fraud patterns that have not appeared in production yet, so detection models see the next attack shape during training instead of after the loss.",
     tech: ["Python"],
+    repos: ["fraud-gen"],
   },
   {
     id: "soar",
@@ -271,9 +315,11 @@ export const projects: Project[] = [
     footprint: "soic",
     blurb: "Turns social-media swipes into a real itinerary.",
     detail:
-      "Swipe through travel content the way you already do, and Soar assembles the places you liked into an actual routed itinerary with timings -- the gap between inspiration and a plan, closed.",
+      "Swipe through travel content the way you already do, and Soar assembles the places you liked into an actual routed itinerary with timings, closing the gap between inspiration and a plan.",
     tech: ["TypeScript"],
     origin: "eurekahacks-2026",
+    repos: ["EurekaHacks"],
+    live: "https://eureka-hacks.vercel.app",
   },
   {
     id: "signal-lost",
@@ -286,6 +332,7 @@ export const projects: Project[] = [
     detail:
       "An AI rewrites the repository's README daily with new lore and a new puzzle. The community solves it through pull requests and issues, and the story branches based on what they find. The repo is the game board.",
     tech: ["Python"],
+    repos: ["SIGNAL-LOST"],
   },
   {
     id: "casperguard",
@@ -295,8 +342,10 @@ export const projects: Project[] = [
     footprint: "soic",
     blurb: "WebAssembly security tooling.",
     detail:
-      "Tooling aimed at the WebAssembly attack surface -- inspecting and hardening modules that increasingly run untrusted code inside the browser sandbox.",
+      "Tooling aimed at the WebAssembly attack surface: inspecting and hardening modules that increasingly run untrusted code inside the browser sandbox.",
     tech: ["WebAssembly"],
+    repos: ["casperguard"],
+    live: "https://casperguard.vercel.app",
   },
   {
     id: "aquapress",
@@ -306,8 +355,10 @@ export const projects: Project[] = [
     footprint: "soic",
     blurb: "Hydraulic waste-compaction concept.",
     detail:
-      "A concept build around hydraulic waste compaction -- modelling the mechanism and the control software that would run it.",
+      "A concept build around hydraulic waste compaction, modelling the mechanism and the control software that would run it.",
     tech: ["TypeScript"],
+    repos: ["aquapress"],
+    live: "https://aquapress.vercel.app",
   },
   {
     id: "typeflow",
@@ -319,6 +370,7 @@ export const projects: Project[] = [
     detail:
       "Reproduces the cadence, hesitation and error-correction of real human typing through PyAutoGUI, instead of the machine-perfect keystroke bursts automation usually produces.",
     tech: ["Python", "PyAutoGUI"],
+    repos: ["typeflow"],
   },
   {
     id: "skypulse",
@@ -330,6 +382,7 @@ export const projects: Project[] = [
     detail:
       "Current conditions and air quality pulled live and rendered for a glance rather than a read.",
     tech: ["TypeScript", "REST APIs"],
+    repos: ["sky-pulse"],
   },
 ];
 
@@ -347,6 +400,7 @@ export const hackathons: Hackathon[] = [
     date: "Dec 2025",
     sort: "2025-12",
     note: "Submitted",
+    url: "https://hacktheridge.devpost.com",
   },
   {
     id: "deltahacks-12",
@@ -355,6 +409,7 @@ export const hackathons: Hackathon[] = [
     location: "Hamilton, ON",
     date: "Jan 2026",
     sort: "2026-01",
+    url: "https://deltahacks-12.devpost.com",
   },
   {
     id: "genai-genesis-2026",
@@ -363,6 +418,7 @@ export const hackathons: Hackathon[] = [
     location: "Toronto, ON",
     date: "Mar 2026",
     sort: "2026-03",
+    url: "https://genai-genesis-2026.devpost.com",
   },
   {
     id: "eurekahacks-2026",
@@ -371,6 +427,7 @@ export const hackathons: Hackathon[] = [
     location: "Waterloo, ON",
     date: "May 2026",
     sort: "2026-05",
+    url: "https://eurekahacks.ca",
   },
   {
     id: "slack-agent",
@@ -379,6 +436,7 @@ export const hackathons: Hackathon[] = [
     location: "Online",
     date: "2026",
     sort: "2026-06",
+    // TODO: no public event page confirmed. Add the Devpost URL here.
   },
   {
     id: "uipath-agenthack",
@@ -387,6 +445,7 @@ export const hackathons: Hackathon[] = [
     location: "Online",
     date: "2026",
     sort: "2026-07",
+    // TODO: no public event page confirmed. Add the Devpost URL here.
   },
   {
     id: "h0-zero-stack",
@@ -395,6 +454,7 @@ export const hackathons: Hackathon[] = [
     location: "Online / Vercel v0 + AWS",
     date: "2026",
     sort: "2026-08",
+    // TODO: no public event page confirmed. Add the Devpost URL here.
   },
 ];
 
@@ -410,7 +470,7 @@ export const experience = {
   output: "shipped projects",
   gain: "20% enrolment growth",
   summary:
-    "Teaches and mentors 100+ students in Python, JavaScript, C#, Unity and MakeCode Arcade -- from a first block-code lesson through to working projects.",
+    "Teaches and mentors 100+ students in Python, JavaScript, C#, Unity and MakeCode Arcade, from a first block-code lesson through to working projects.",
   points: [
     "Runs project-based bootcamps, coaching debugging and root-cause analysis rather than answers.",
     "Built Python mini-projects and automation scripts now used as teaching material.",
@@ -436,7 +496,7 @@ export const leadership = [
     designator: "D2",
     name: "Leadership Club",
     detail:
-      "Ran school-wide holiday events for kids aged 5 to 12 -- scheduling, activity design, and day-of coordination.",
+      "Ran school-wide holiday events for kids aged 5 to 12: scheduling, activity design, and day-of coordination.",
   },
   {
     id: "community",

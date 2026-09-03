@@ -16,7 +16,7 @@ import { NODES, WORLD, type BoardNode } from "@/lib/layout";
 import type { GithubData } from "@/lib/github";
 import type { Transmission } from "@/lib/daily";
 import Substrate from "@/components/board/Substrate";
-import Traces from "@/components/board/Traces";
+import Traces, { CurrentLayer } from "@/components/board/Traces";
 import ProjectPart from "@/components/board/nodes/ProjectPart";
 import { Ignition, PowerSource } from "@/components/board/nodes/PowerSource";
 import RailPin from "@/components/board/nodes/RailPin";
@@ -53,6 +53,7 @@ const World = forwardRef<HTMLDivElement, WorldProps>(function World(
     >
       <Substrate reached={reached} />
       <Traces reached={reached} active={active} />
+      <CurrentLayer reached={reached} active={active} />
 
       <h2 className="sr-only">The board</h2>
 

@@ -26,6 +26,14 @@ export interface NodeProps {
   readoutWidth?: number;
   /** Opacity before this node's stop is reached. */
   dimOpacity?: number;
+  /** Reference designator, printed on the silkscreen BESIDE the footprint. */
+  silk?: string;
+  /** Font size for that designator, in world units. */
+  silkSize?: number;
+  /** Where the whole component opens to. Absent = not a link. */
+  href?: string;
+  /** What that link is announced as. */
+  hrefLabel?: string;
 }
 
 export default function Node({
@@ -40,6 +48,10 @@ export default function Node({
   readout,
   readoutWidth = 420,
   dimOpacity = 0.22,
+  silk,
+  silkSize = 13,
+  href,
+  hrefLabel,
 }: NodeProps) {
   const powered = reached >= node.stop;
   const hot = active === node.id;
@@ -50,7 +62,9 @@ export default function Node({
       id={`node-${node.id}`}
       data-node={node.id}
       aria-label={label}
-      tabIndex={0}
+      /* When the part is a link, the overlay anchor is the focus target, so
+         the container must not also collect a tab stop. */
+      tabIndex={href ? -1 : 0}
       onPointerEnter={() => onActivate(node.id)}
       onPointerLeave={() => onActivate(null)}
       onFocus={() => onActivate(node.id)}
@@ -71,14 +85,43 @@ export default function Node({
         transform: powered ? "none" : "translateY(6px)",
         transition:
           "opacity 700ms cubic-bezier(.2,.7,.3,1) 220ms, transform 700ms cubic-bezier(.2,.7,.3,1) 220ms, filter 700ms ease 220ms",
+        cursor: href ? "pointer" : undefined,
         ...style,
       }}
     >
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0 z-20"
+          aria-label={hrefLabel ?? label}
+        >
+          <span className="sr-only">{hrefLabel ?? label}</span>
+        </a>
+      ) : null}
+      {silk ? (
+        <span
+          className="desig-silk lod-mid pointer-events-none absolute select-none"
+          style={{
+            bottom: "100%",
+            left: 1,
+            marginBottom: 7,
+            fontSize: silkSize,
+            color: hot ? "var(--color-hot)" : undefined,
+            opacity: hot ? 1 : undefined,
+          }}
+          aria-hidden="true"
+        >
+          {silk}
+        </span>
+      ) : null}
+
       {children}
 
       {readout ? (
         <div
-          className="absolute top-0"
+          className="absolute top-0 z-30"
           style={{
             [side === "right" ? "left" : "right"]: "calc(100% + 42px)",
             width: readoutWidth,

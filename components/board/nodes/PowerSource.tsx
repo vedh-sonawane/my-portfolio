@@ -96,18 +96,30 @@ export function Ignition({
   );
 }
 
+/**
+ * Three places to start, for the visitor who has a minute rather than ten.
+ * One thing that moves, one thing that shipped, one thing that taught.
+ */
+const START_HERE: { id: string; label: string; note: string }[] = [
+  { id: "rover", label: "Rover", note: "hardware" },
+  { id: "vow", label: "Vow", note: "shipped" },
+  { id: "amp", label: "Code Ninjas", note: "teaching" },
+];
+
 export function PowerSource({
   node,
   reached,
   active,
   onActivate,
   contributions,
+  onJump,
 }: {
   node: BoardNode;
   reached: number;
   active: string | null;
   onActivate: (id: string | null) => void;
   contributions: number;
+  onJump: (nodeId: string) => void;
 }) {
   const revealed = {
     "--rev": REVEALED,
@@ -194,7 +206,27 @@ export function PowerSource({
           {identity.tagline}
         </p>
 
-        <dl className="lod-mid m-0 mt-6 grid gap-y-4" style={revealed}>
+        <div className="lod-mid mt-6" style={revealed}>
+          <p className="silk m-0" style={{ fontSize: 12 }}>
+            Start here
+          </p>
+          <ul className="m-0 mt-2 flex flex-wrap gap-2 p-0">
+            {START_HERE.map((s) => (
+              <li key={s.id} className="list-none">
+                <button
+                  type="button"
+                  onClick={() => onJump(s.id)}
+                  className="silk border px-2.5 py-1.5 transition-colors hover:text-ink"
+                  style={{ borderColor: "var(--color-copper)", fontSize: 12 }}
+                >
+                  <span style={{ color: "var(--color-ink)" }}>{s.label}</span>
+                  <span style={{ color: "var(--color-hot)" }}> · {s.note}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <dl className="lod-mid m-0 mt-5 grid gap-y-3.5" style={revealed}>
           <div>
             <dt className="silk m-0" style={{ fontSize: 12 }}>Role</dt>
             <dd className="m-0 mt-1.5 text-[19px] text-ink-dim">{identity.role}</dd>
@@ -204,6 +236,7 @@ export function PowerSource({
             <dd className="m-0 mt-1.5 text-[19px] text-ink-dim">{identity.location}</dd>
           </div>
         </dl>
+
       </div>
 
       {/* the bead of solder riding the leading edge of the wipe */}

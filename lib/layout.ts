@@ -48,6 +48,7 @@ const ROW_P1 = 1150; // physical row bus, upper
 const ROW_P2 = 1900; // physical row bus, lower
 const ROW_D1 = 620; // digital row bus, upper
 const ROW_D2 = 1420; // digital row bus, lower -- continuous with the crossover
+const ROW_D3 = 2150; // digital row bus, third; stops short of the output node
 const RAIL_Y = 3250; // bottom power rail
 const ORIGIN_X = 380; // the vertical run the ignition switch sits on
 const AMP_Y = 2680; // the amplifier feed
@@ -100,6 +101,8 @@ export const BUSES: Bus[] = [
   { id: "row-p2", weight: "branch", pts: [[SPINE_L, ROW_P2], [340, ROW_P2]] },
   { id: "spine-d", weight: "branch", pts: [[SPINE_D, ROW_D1], [SPINE_D, AMP_Y]] },
   { id: "row-d1", weight: "branch", pts: [[SPINE_D, ROW_D1], [SPINE_R, ROW_D1]] },
+  // Row D3 stops at x=3600 so it never runs under the output node.
+  { id: "row-d3", weight: "branch", pts: [[SPINE_D, ROW_D3], [3600, ROW_D3]] },
   { id: "spine-r", weight: "branch", pts: [[SPINE_R, ROW_D1], [SPINE_R, ROW_D2]] },
   // Amplifier feed: signal comes down the digital spine, through AMP1,
   // and leaves amplified into the output return.
@@ -151,7 +154,7 @@ export const STOPS: Stop[] = [
   {
     id: "hero",
     label: "Power source",
-    rect: { x: 440, y: 2280, w: 1180, h: 700 },
+    rect: { x: 440, y: 2260, w: 1180, h: 740 },
     mobileRect: { x: 560, y: 2320, w: 720, h: 620 },
     maxScale: 1.05,
   },
@@ -183,13 +186,24 @@ export const STOPS: Stop[] = [
     maxScale: 0.85,
   },
   {
+    id: "digital-c",
+    label: "Digital half · platforms",
+    rect: { x: 2380, y: 1850, w: 1240, h: 340 },
+    mobileSplit: [
+      { x: 2400, y: 1860, w: 460, h: 700 },
+      { x: 2960, y: 1860, w: 460, h: 700 },
+    ],
+    maxScale: 0.85,
+  },
+  {
     id: "physical",
     label: "Physical half · hardware",
-    rect: { x: 460, y: 790, w: 1270, h: 1400 },
+    rect: { x: 450, y: 790, w: 1330, h: 1400 },
     mobileSplit: [
       { x: 520, y: 700, w: 440, h: 800 },
       { x: 1180, y: 700, w: 440, h: 800 },
       { x: 680, y: 1400, w: 500, h: 780 },
+      { x: 1260, y: 1400, w: 500, h: 780 },
       { x: 520, y: 1880, w: 400, h: 660 },
       { x: 920, y: 1880, w: 400, h: 660 },
       { x: 1320, y: 1880, w: 400, h: 660 },
@@ -352,6 +366,9 @@ const PROJECT_SLOTS: Record<string, Slot> = {
   kivo: { x: 1400, y: 950, w: 400, h: 260, bus: ROW_P1, stop: "physical", readout: "left" },
   /* PHYSICAL half -- row P2 */
   rover: { x: 940, y: 1680, w: 460, h: 300, bus: ROW_P2, stop: "physical" },
+  penghost: {
+    x: 1520, y: 1680, w: 460, h: 300, bus: ROW_P2, stop: "physical", readout: "left",
+  },
 
   /* DIGITAL half -- row D1, above the bus */
   destiny: { x: 2600, y: 420, w: 340, h: 320, bus: ROW_D1, stop: "digital-a" },
@@ -376,6 +393,10 @@ const PROJECT_SLOTS: Record<string, Slot> = {
   "signal-lost": {
     x: 3800, y: 1255, w: 420, h: 250, bus: ROW_D2, stop: "digital-b", readout: "left",
   },
+
+  /* DIGITAL half -- row D3, above the bus */
+  forme: { x: 2620, y: 2000, w: 420, h: 250, bus: ROW_D3, stop: "digital-c" },
+  "sentinel-ai": { x: 3180, y: 2000, w: 420, h: 250, bus: ROW_D3, stop: "digital-c" },
 
   /* DIGITAL half -- row D2, below the bus */
   "ml-from-scratch": { x: 2560, y: 1630, w: 280, h: 160, bus: ROW_D2, stop: "digital-b" },
@@ -419,11 +440,11 @@ function buildNodes(): BoardNode[] {
     x: 900,
     y: 2560,
     w: 640,
-    h: 420,
+    h: 480,
     stop: stopIndex("hero"),
     // The name feeds the bottom rail as well as the spine.
     wire: [
-      [900, 2770],
+      [900, 2800],
       [900, RAIL_Y],
     ],
   });

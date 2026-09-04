@@ -47,6 +47,11 @@ export interface Project {
   footprint: Footprint;
   /** Featured parts are drawn larger and get a fuller readout. */
   featured?: boolean;
+  /**
+   * Set when a project is not finished, e.g. "In build". Printed as a tag on
+   * the silkscreen so nothing on the board overclaims.
+   */
+  status?: string;
   /** One line. Shown on the board without interaction. */
   blurb: string;
   /** Expanded readout, shown on hover / focus. */
@@ -60,6 +65,12 @@ export interface Project {
   repos?: string[];
   /** A deployment a visitor can actually open. Verified reachable. */
   live?: string;
+  /**
+   * A photograph or screenshot, shown in the readout panel. Put the file in
+   * `public/projects/`. If the file is missing the figure simply does not
+   * render, so a slot can be declared before the photo exists.
+   */
+  image?: { src: string; alt: string };
   /** id of the hackathon this was built at -- draws a cross-wire on the board. */
   origin?: string;
 }
@@ -103,6 +114,11 @@ export const identity = {
     linkedin: "https://www.linkedin.com/in/vedh-sonawane-60a0753bb/",
   },
   /**
+   * Served straight from `public/`. Recruiters look for this first, so it gets
+   * its own terminal on the contact block rather than being buried.
+   */
+  resume: "/Vedh-Sonawane-Resume.pdf",
+  /**
    * The email, in fragments. Joined only in the browser (see lib/email.ts) so
    * no contiguous copy of the address ever reaches the server-rendered HTML,
    * which is what address harvesters read. Edit the pieces, not a whole
@@ -140,6 +156,11 @@ export const projects: Project[] = [
       "An RC-car chassis rebuilt into an autonomous assistant: Arduino motor control underneath, computer vision on top, and onboard decision-making that closes the loop between what it sees and where it drives. Sensors feed obstacle and target data back into the control layer in real time.",
     tech: ["Python", "OpenCV", "Arduino"],
     repos: ["rover"],
+    image: {
+      src: "/projects/rover.jpg",
+      alt:
+        "Rover on a white bench: a four-wheeled RC chassis carrying a stacked aluminium deck with an Arduino Uno, a 16x2 LCD, a breadboard, a camera module and a pair of ultrasonic sensors at the front, tethered by a coiled cable to a laptop showing a running terminal.",
+    },
   },
   {
     id: "kivo",
@@ -153,6 +174,11 @@ export const projects: Project[] = [
       "A desk companion that is equal parts firmware and intelligence: embedded C++ on an Arduino Uno drives the hardware and motion, while a Python layer handles the reasoning and automation. The two halves talk over serial, which is the clearest small example of software leaving the screen.",
     tech: ["Python", "C++", "Arduino"],
     repos: ["kivo"],
+    image: {
+      src: "/projects/kivo.jpg",
+      alt:
+        "Kivo on a desk: an Elegoo Arduino Uno wired across two breadboards to a blue-backlit 16x2 LCD showing a remembered note and a 24 minute focus timer, with a micro servo, a PIR motion sensor, an HC-SR04 ultrasonic rangefinder and a light sensor wired in beside it.",
+    },
   },
   {
     id: "breezebrain",
@@ -165,6 +191,31 @@ export const projects: Project[] = [
       "Continuous temperature monitoring drives automatic fan-speed control, with real-time telemetry on an LCD and interactive controls for overriding the curve. A closed control loop you can hold your hand in front of and watch respond.",
     tech: ["C++", "Arduino"],
     repos: ["breeze_brain"],
+    image: {
+      src: "/projects/breezebrain.jpg",
+      alt:
+        "The BreezeBrain rig: an Arduino wired across a breadboard to a 16x2 LCD reading MANUAL SPEED 3200 RPM, an 80mm case fan, a speaker and a row of control buttons, all mounted on a grey panel.",
+    },
+  },
+
+  {
+    id: "penghost",
+    designator: "M2",
+    name: "PenGhost",
+    half: "physical",
+    footprint: "driver",
+    featured: true,
+    status: "In build",
+    blurb: "A mini CNC pen plotter built out of dead DVD drives.",
+    detail:
+      "Two salvaged DVD drive sleds provide the X and Y motion, an old hard drive becomes the base, and a single servo lifts the pen. An Arduino Uno drives the whole thing through an L293D motor shield. Almost every moving part came out of something that was already broken, which is the point: e-waste turned into a machine that draws with precision.",
+    tech: ["Arduino", "CNC", "Salvaged hardware"],
+    repos: ["penghost"],
+    image: {
+      src: "/projects/penghost.jpg",
+      alt:
+        "The PenGhost build laid out on a wooden floor: a stripped optical drive chassis with two discs used as platters, a blue micro servo, a marker pen taped to a cardboard arm, PLACE PAPER written by hand on one disc, and an Elegoo Arduino Uno wired in beside it.",
+    },
   },
 
   /* -- DIGITAL HALF ------------------------------------------------------ */
@@ -333,6 +384,32 @@ export const projects: Project[] = [
       "An AI rewrites the repository's README daily with new lore and a new puzzle. The community solves it through pull requests and issues, and the story branches based on what they find. The repo is the game board.",
     tech: ["Python"],
     repos: ["SIGNAL-LOST"],
+  },
+  {
+    id: "forme",
+    designator: "U17",
+    name: "Forme",
+    half: "digital",
+    footprint: "dip",
+    featured: true,
+    blurb: "Learns design from real websites, then designs with it.",
+    detail:
+      "Analyses high-quality websites and screenshots to work out the patterns underneath them: typography, layout, colour, spacing, visual hierarchy. It keeps that as a Design DNA, uses it to generate or redesign a site, critiques the result visually, and iterates on its own output.",
+    tech: ["TypeScript", "Vision models"],
+    repos: ["forme"],
+  },
+  {
+    id: "sentinel-ai",
+    designator: "U18",
+    name: "Sentinel AI",
+    half: "digital",
+    footprint: "dip",
+    featured: true,
+    blurb: "Multi-agent platform: fraud, health, memory, explainability.",
+    detail:
+      "A production-ready full-stack platform built on a modular architecture, with separate agents for fraud detection, health, memory and explainability working together behind one interface. Deliberately general enough to compete across very different hackathon tracks.",
+    tech: ["Python", "Multi-agent", "Full-stack"],
+    repos: ["sentinel-ai"],
   },
   {
     id: "casperguard",

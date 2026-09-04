@@ -62,6 +62,7 @@ normally want to change lives here:
 | Skills (the silkscreen legend) | `legend` |
 | Currently exploring / reading | `firmware` |
 | Certification, awards, spoken languages | `credentials` |
+| Resume path, contact links, email fragments | `identity` |
 | Fallback lines for the daily TRANSMISSION | `transmissions` |
 
 **Adding a project** takes two steps:
@@ -200,6 +201,17 @@ the board is a 404. Three hackathons have no confirmed public event page and
 are therefore deliberately not links; they are marked with a TODO in the data
 file. An absent link is honest, an invented one is a dead end.
 
+### Photographs
+
+A project can carry an `image` in `data/content.ts`; it appears at the top of
+that part's datasheet when you hover or focus it, and again in the document
+view. Files live in `public/projects/` (see the README in there for the exact
+names). They are served through `next/image`, so a 4MB photo straight off a
+phone is resized and re-encoded on demand rather than shipped raw.
+
+A slot whose file is missing simply does not render, so a photo can be declared
+before it has been taken.
+
 ### The email
 
 The address is never written into the HTML. `identity.emailParts` holds it in
@@ -230,6 +242,16 @@ It is computed on the server and passed down as a prop, so the client never
 derives a different value and hydration stays clean.
 
 ---
+
+## Getting around quickly
+
+Not every visitor wants the full rail. There are three ways out of it:
+
+- **Start here** on the name card jumps straight to one hardware build, one
+  shipped product and one teaching entry;
+- **Sections** in the bottom bar lists every section and jumps to it, which is
+  what stops a 32-stop mobile rail from being a trap;
+- **Read as document** in the header abandons the board entirely for `/document`.
 
 ## The three ways to move
 

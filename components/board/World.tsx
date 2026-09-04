@@ -34,10 +34,12 @@ export interface WorldProps {
   github: GithubData;
   transmission: Transmission;
   voltage: number;
+  /** Fly the camera to a component by id. */
+  onJump: (nodeId: string) => void;
 }
 
 const World = forwardRef<HTMLDivElement, WorldProps>(function World(
-  { reached, active, onActivate, github, transmission, voltage },
+  { reached, active, onActivate, github, transmission, voltage, onJump },
   ref,
 ) {
   const shared = { reached, active, onActivate };
@@ -55,8 +57,6 @@ const World = forwardRef<HTMLDivElement, WorldProps>(function World(
       <Traces reached={reached} active={active} />
       <CurrentLayer reached={reached} active={active} />
 
-      <h2 className="sr-only">The board</h2>
-
       {/* 01 -- ignition */}
       <Ignition node={byId("ignition")} armed={reached >= 1} {...shared} />
 
@@ -64,15 +64,18 @@ const World = forwardRef<HTMLDivElement, WorldProps>(function World(
       <PowerSource
         node={byId("hero")}
         contributions={github.totalContributions}
+        onJump={onJump}
         {...shared}
       />
 
       {/* 03 -- physical half */}
+      <h2 className="sr-only">Physical half: hardware</h2>
       {physical.map((p) => (
         <ProjectPart key={p.id} project={p} node={byId(p.id)} {...shared} />
       ))}
 
       {/* printed furniture on the physical half */}
+      <h2 className="sr-only">Board legend: skills, firmware and stamps</h2>
       <LegendPanel node={byId("legend")} {...shared} />
       <FirmwarePanel node={byId("firmware")} {...shared} />
       <StampsPanel node={byId("stamps")} {...shared} />
@@ -81,19 +84,23 @@ const World = forwardRef<HTMLDivElement, WorldProps>(function World(
       ))}
 
       {/* 04 -- digital half */}
+      <h2 className="sr-only">Digital half: software</h2>
       {digital.map((p) => (
         <ProjectPart key={p.id} project={p} node={byId(p.id)} {...shared} />
       ))}
 
       {/* 05 -- hackathon rail */}
+      <h2 className="sr-only">Hackathon rail</h2>
       {hackathons.map((h) => (
         <RailPin key={h.id} hackathon={h} node={byId(h.id)} {...shared} />
       ))}
 
       {/* 06 -- amplifier */}
+      <h2 className="sr-only">Experience: Code Ninjas</h2>
       <Amplifier node={byId("amp")} {...shared} />
 
       {/* 07 -- live output */}
+      <h2 className="sr-only">Live output: GitHub telemetry</h2>
       <OutputNode
         node={byId("output")}
         github={github}
@@ -103,6 +110,7 @@ const World = forwardRef<HTMLDivElement, WorldProps>(function World(
       />
 
       {/* 08 -- contact terminal */}
+      <h2 className="sr-only">Open a connection</h2>
       <ContactTerminal node={byId("contact")} {...shared} />
 
       {/* silkscreen board legend, bottom-left of the substrate */}

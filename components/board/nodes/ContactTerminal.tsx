@@ -15,6 +15,7 @@ import Node from "@/components/board/Node";
 import EmailReveal from "@/components/EmailReveal";
 
 const WIRED = [
+  { label: "Resume", value: "PDF", href: identity.resume },
   { label: "LinkedIn", value: "vedh-sonawane", href: identity.links.linkedin },
   { label: "GitHub", value: identity.githubLogin, href: identity.links.github },
   { label: "Devpost", value: "sonawane-vedh14", href: identity.links.devpost },

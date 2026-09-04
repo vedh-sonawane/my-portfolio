@@ -72,6 +72,7 @@ export default function Board({
   const [active, setActive] = useState<string | null>(null);
   const [stopI, setStopI] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [reduced, setReduced] = useState(false);
 
   /* refs the animation loop reads without re-rendering anything */
@@ -550,6 +551,19 @@ export default function Board({
     [scrollToStop],
   );
 
+  /** Fly the guided camera to a named component. Used by the hero shortcuts. */
+  const jumpToNode = useCallback(
+    (nodeId: string) => {
+      const n = nodeById(nodeId);
+      if (!n) return;
+      const stops = activeStops(mobileRef.current);
+      const target = STOPS[n.stop];
+      const local = stops.findIndex((st) => st.base === target?.id);
+      if (local >= 0) scrollToStop(local);
+    },
+    [scrollToStop],
+  );
+
   const jumpTo = useCallback((x: number, y: number) => {
     camRef.current = clampFree(
       { ...camRef.current, x, y },
@@ -589,6 +603,7 @@ export default function Board({
           github={github}
           transmission={transmission}
           voltage={voltage}
+          onJump={jumpToNode}
         />
 
         {/* vignette: keeps the eye in the middle of the frame */}
@@ -685,8 +700,20 @@ export default function Board({
                     </span>
                     <button
                       type="button"
-                      onClick={() => scrollToStop(stops.length - 1)}
+                      onClick={() => setMenuOpen((v) => !v)}
                       className="silk ml-1 border border-copper px-2 py-1 hover:border-hot hover:text-ink"
+                      aria-expanded={menuOpen}
+                    >
+                      {menuOpen ? "Close" : "Sections"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollToStop(stops.length - 1)}
+                      className="silk border px-2 py-1"
+                      style={{
+                        borderColor: "var(--color-hot)",
+                        color: "var(--color-hot)",
+                      }}
                     >
                       Contact
                     </button>
@@ -718,6 +745,43 @@ export default function Board({
             )}
           </div>
         </div>
+
+        {/* Jump straight to any section. A 32-stop rail needs a way out. */}
+        {menuOpen && mode === "guided" ? (
+          <nav
+            className="pointer-events-auto absolute right-3 bottom-24 left-3 border border-copper bg-board/95 p-2 sm:right-6 sm:left-auto sm:w-72"
+            aria-label="Board sections"
+          >
+            <ul className="m-0 grid gap-0.5 p-0">
+              {STOPS.filter((base) => base.id !== "boot" && base.id !== "ignite").map(
+                (base) => {
+                  const first = stops.findIndex((st) => st.base === base.id);
+                  if (first < 0) return null;
+                  return (
+                    <li key={base.id} className="list-none">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          scrollToStop(first);
+                        }}
+                        className="silk w-full px-2 py-2 text-left hover:text-ink"
+                        style={{
+                          color:
+                            stops[stopI]?.base === base.id
+                              ? "var(--color-hot)"
+                              : undefined,
+                        }}
+                      >
+                        {base.label}
+                      </button>
+                    </li>
+                  );
+                },
+              )}
+            </ul>
+          </nav>
+        ) : null}
 
         {/* intro affordances */}
         {mode === "guided" && intro ? (

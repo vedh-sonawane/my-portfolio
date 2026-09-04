@@ -5,6 +5,7 @@ import { hackathons, repoUrl } from "@/data/content";
 import type { BoardNode } from "@/lib/layout";
 import Footprint, { INSET } from "@/components/board/Footprint";
 import Node, { Readout } from "@/components/board/Node";
+import PartPhoto from "@/components/board/nodes/PartPhoto";
 
 export default function ProjectPart({
   project,
@@ -42,12 +43,24 @@ export default function ProjectPart({
       label={`${project.designator}: ${project.name}. ${project.blurb}`}
       href={primary}
       hrefLabel={primaryLabel}
-      silk={project.designator}
+      silk={
+        project.status ? `${project.designator} · ${project.status}` : project.designator
+      }
       silkSize={big ? 15 : 13}
       readoutWidth={440}
       readout={
         <Readout title={`${project.designator} // datasheet`}>
-          <h3 className="mb-2 text-[19px] leading-tight text-ink">{project.name}</h3>
+          {project.image ? (
+            <PartPhoto src={project.image.src} alt={project.image.alt} />
+          ) : null}
+          <h3 className="mb-2 flex flex-wrap items-baseline gap-x-3 text-[19px] leading-tight text-ink">
+            {project.name}
+            {project.status ? (
+              <span className="silk" style={{ color: "var(--color-hot)" }}>
+                {project.status}
+              </span>
+            ) : null}
+          </h3>
           <p className="m-0 text-[13px] leading-relaxed text-ink-dim">
             {project.detail}
           </p>

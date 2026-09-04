@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Martian_Mono, Spline_Sans_Mono } from "next/font/google";
 import { identity } from "@/data/content";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -102,6 +104,9 @@ export default function RootLayout({
           Skip to content
         </a>
         {children}
+        {/* Both are no-ops off Vercel and neither collects personal data. */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

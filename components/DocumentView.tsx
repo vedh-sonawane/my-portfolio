@@ -10,6 +10,7 @@
  * It is deliberately plain. The board is the experience; this is the record.
  */
 
+import Image from "next/image";
 import {
   credentials,
   experience,
@@ -165,6 +166,7 @@ export default function DocumentView({
             ["GitHub", identity.links.github],
             ["LinkedIn", identity.links.linkedin],
             ["Devpost", identity.links.devpost],
+            ["Resume (PDF)", identity.resume],
           ].map(([label, href]) => (
             <li key={label}>
               <a
@@ -188,10 +190,27 @@ export default function DocumentView({
                 key={p.id}
                 designator={p.designator}
                 name={p.name}
-                meta={p.tech.join(" · ")}
+                meta={[p.status, p.tech.join(" · ")].filter(Boolean).join(" · ")}
                 href={p.live ?? (p.repos ? repoUrl(p.repos[0]) : undefined)}
               >
                 <p className="mt-2">{p.detail}</p>
+                {p.image ? (
+                  <div
+                    className="relative mt-4 w-full max-w-xl"
+                    style={{
+                      aspectRatio: "16 / 10",
+                      border: "1px solid var(--color-copper)",
+                    }}
+                  >
+                    <Image
+                      src={p.image.src}
+                      alt={p.image.alt}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 576px"
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
+                ) : null}
                 <ProjectLinks project={p} />
               </Entry>
             ))}
@@ -205,7 +224,7 @@ export default function DocumentView({
                 key={p.id}
                 designator={p.designator}
                 name={p.name}
-                meta={p.tech.join(" · ")}
+                meta={[p.status, p.tech.join(" · ")].filter(Boolean).join(" · ")}
                 href={p.live ?? (p.repos ? repoUrl(p.repos[0]) : undefined)}
               >
                 <p className="mt-2">{p.detail}</p>
@@ -370,6 +389,16 @@ export default function DocumentView({
                 rel="noopener noreferrer"
               >
                 devpost.com/sonawane-vedh14
+              </a>
+            </li>
+            <li>
+              <a
+                className="text-hot underline decoration-hot/40 underline-offset-4"
+                href={identity.resume}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Resume (PDF)
               </a>
             </li>
           </ul>
